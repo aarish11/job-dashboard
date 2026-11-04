@@ -218,6 +218,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   .search { flex: 1; }
   .search input { width: 100%; }
   .kbd { display: none; }
+  #run-scan { order: 3; }
   .tabs { display: none; }
   .regions { width: 100%; justify-content: space-between; }
   .regions button { flex: 1; justify-content: center; padding: 7px 6px; }
@@ -270,6 +271,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
         <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input type="search" id="q" placeholder="Search jobs and companies" aria-label="Search jobs and companies"></label>
         <span class="kbd" aria-hidden="true">/</span>
+        <a class="btn quiet" id="run-scan" href="https://github.com/aarish11/career-portal-scanner/actions/workflows/scan.yml" target="_blank" rel="noopener noreferrer" title="Opens GitHub. Click Run workflow there.">Run a scan</a>
       </div>
     </header>
     <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -378,8 +380,16 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     $('#tabs').replaceChildren(...TABS.map((t) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.id), onclick: () => go(t.id) }, t.label, counts[t.id] != null ? h('span', { class: 'badge' }, fmt(counts[t.id])) : null)));
     $('#bottom-nav').replaceChildren(...TABS.map((t) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.id), onclick: () => go(t.id) }, svg(t.icon, 22), t.short || t.label)));
     const d = state.data, m = d.scan_meta && d.scan_meta[0];
-    $('#scan-line').textContent = m ? `Last scan ${when(m.started)}` : '';
+    $('#scan-line').textContent = m ? `Last scan ${when(m.started)}. Next automatic scan ${nextScan()}` : '';
     $('#gen-line').textContent = `Site updated ${when(d.generated)}. Saved and hidden jobs are remembered on this device only.`;
+  }
+  function nextScan() {
+    // Automatic scans run at about 08:25 and 19:25 India time (GitHub may start them a few minutes late).
+    const now = new Date(), ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const mins = ist.getHours() * 60 + ist.getMinutes();
+    if (mins < 8 * 60 + 25) return 'today about 08:25 IST';
+    if (mins < 19 * 60 + 25) return 'today about 19:25 IST';
+    return 'tomorrow about 08:25 IST';
   }
   function tabCounts() {
     const d = state.data;
@@ -398,7 +408,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       { id: 'open', label: 'Open roles', rows: open, hint: 'at your target companies', go: () => go('open') },
       { id: 'new', label: 'New this scan', rows: waiting.concat(scored), hint: `${fmt(waiting.length)} waiting to be scored`, go: () => go('today') },
       { id: 'scored', label: 'Scored 7+', rows: scored.filter((j) => Number(j.score) >= 7), hint: 'strong matches', go: () => go('today') },
-      { id: 'short', label: 'Shortlisted', rows: st(['Shortlisted', 'New', 'Needs JD']), hint: 'in your trackers', go: () => go('apps') },
+      { id: 'short', label: 'Shortlisted by you', rows: st(['Shortlisted']), hint: 'ready to apply', go: () => go('apps') },
       { id: 'applied', label: 'Applied', rows: st(['Applied']), hint: '', go: () => go('apps') },
       { id: 'int', label: 'Interviews', rows: st(['Screening', 'Interview']), hint: '', go: () => go('apps') },
       { id: 'offer', label: 'Offers', rows: st(['Offer']), hint: '', go: () => go('apps') },
@@ -445,7 +455,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
           ['Region', h('span', { class: 'tag' }, h('span', { class: 'dot', style: { background: rc(j.region) } }), j.region || '')],
           ['Match score', j.score != null ? `${j.score} / 10` : null],
           ['Confidence', j.confidence], ['Eligibility', j.eligibility],
-          ['Status', isTracked ? h('span', { class: 'pill ' + statusTone(j.status) }, j.status) : null],
+          ['Status', isTracked ? h('span', { class: 'pill ' + statusTone(j.status) }, showStatus(j.status)) : null],
           ['Source', j.source], ['Next action', j.next_action ? `${j.next_action}${j.next_action_due ? ' by ' + day(j.next_action_due) : ''}` : null],
           ['Posted', j.posted ? day(j.posted) : null], ['First seen', j.first_seen ? day(j.first_seen) : null], ['Found', j.date_found ? day(j.date_found) : null],
           ['Priority', co ? co.priority : j.priority], ['TCS BaNCS', co && co.bancs_note ? co.bancs_note : null],
@@ -469,6 +479,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       [roles.length ? h('button', { class: 'btn', type: 'button', onclick: () => { closeDrawer(); state.q = ''; $('#q').value = ''; go('open', { company: c.company }); } }, `See all ${fmt(roles.length)} roles`) : null,
        safe(c.careers_url) ? h('a', { class: 'btn quiet', href: c.careers_url, target: '_blank', rel: 'noopener noreferrer' }, 'Careers page') : null]);
   }
+  const showStatus = (s) => (s === 'Shortlisted' ? 'Shortlisted by you' : s);
   const statusTone = (s) => (/^(Offer|Interview|Screening)/.test(s) ? 'ok' : /^(Applied|Shortlisted)/.test(s) ? 'ok' : /^(Rejected|Not a Fit|Withdrawn|Closed)/.test(s) ? 'muted' : 'warn');
   const coTone = (s) => ({ 'Scanned': 'ok', 'Error': 'bad', 'Blocked (needs browser)': 'warn', 'Broken link': 'warn', 'Unreachable': 'warn' }[s] || 'muted');
 
@@ -538,14 +549,14 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const d = state.data, all = (d.trackers || []).filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location, j.status));
     if (!(d.trackers || []).length) return h('p', { class: 'empty' }, 'No tracker data yet.');
     const cols = [
-      { name: 'To review', match: ['New', 'Needs JD'] }, { name: 'Shortlisted', match: ['Shortlisted'] }, { name: 'Applied', match: ['Applied'] },
+      { name: 'To review', match: ['New', 'Needs JD'] }, { name: 'Shortlisted by you', match: ['Shortlisted'] }, { name: 'Applied', match: ['Applied'] },
       { name: 'Interviewing', match: ['Screening', 'Interview'] }, { name: 'Offer', match: ['Offer'] }, { name: 'Closed', match: ['Rejected', 'Not a Fit', 'Withdrawn', 'Closed'] },
     ];
     const board = h('div', { class: 'board' }, cols.map((c) => {
       const items = all.filter((j) => c.match.includes(grp(j.status))).sort((a, b) => (b.date_found || '').localeCompare(a.date_found || ''));
       return h('section', { class: 'col', 'aria-label': c.name }, h('h3', {}, c.name, h('span', { class: 'num' }, fmt(items.length))),
         items.length ? items.map((j) => h('button', { class: 'tile', type: 'button', style: { '--c': rc(j.region) }, onclick: () => jobDrawer(j, { tracked: true }) },
-          h('span', { class: 't' }, j.role), h('span', { class: 'm' }, j.company), h('span', { class: 'm' }, [j.status !== c.name ? j.status : null, day(j.date_found)].filter(Boolean).join(', '))))
+          h('span', { class: 't' }, j.role), h('span', { class: 'm' }, j.company), h('span', { class: 'm' }, [showStatus(j.status) !== c.name ? showStatus(j.status) : null, day(j.date_found)].filter(Boolean).join(', '))))
         : h('p', { class: 'muted', style: { fontSize: '.84rem', margin: '4px' } }, 'None'));
     }));
     return h('section', { class: 'panel' }, h('h2', {}, 'My applications'), h('p', { class: 'sub' }, 'Every job in your Gulf, India and Europe trackers, by stage. Swipe sideways to see every stage. Tap a job for its details.'), board);
