@@ -202,6 +202,47 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 9px 14px; border-radius: 999px; font-size: .88rem; z-index: 60; box-shadow: var(--shadow); }
 
 
+/* ---------- Pulse row: goal ring, activity calendar, follow-ups ---------- */
+.pulse { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 320px); gap: 18px; margin-bottom: 18px; align-items: stretch; }
+.ring-wrap { display: grid; justify-items: center; gap: 8px; text-align: center; }
+.ring-wrap svg { width: 132px; height: 132px; }
+.ring-num { font: 700 2rem/1 var(--cond); }
+.ring-sub { font-size: .82rem; color: var(--muted); }
+.goal-edit { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; color: var(--muted); }
+.goal-edit button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); line-height: 1; }
+.heat { display: grid; gap: 8px; }
+.heat svg { width: 100%; max-width: 560px; height: auto; display: block; margin: 0 auto; }
+.heat rect.day { cursor: pointer; }
+.heat rect.day:hover, .heat rect.day:focus { stroke: var(--ink); stroke-width: 1.5; outline: none; }
+.heat-legend { display: flex; align-items: center; gap: 4px; font-size: .76rem; color: var(--muted); justify-content: flex-end; }
+.heat-legend span { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.heat-stats { display: flex; flex-wrap: wrap; gap: 16px; font-size: .84rem; color: var(--muted); }
+.heat-stats b { font: 700 1.15rem/1 var(--cond); color: var(--ink); margin-right: 4px; }
+.fu-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 4px; border: 0; border-bottom: 1px solid var(--line); background: transparent; width: 100%; text-align: left; }
+.fu-row:last-child { border-bottom: 0; }
+.fu-row:hover { background: var(--sunk); }
+.fu-row .t { font-weight: 600; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fu-row .m { font-size: .8rem; color: var(--muted); }
+.days { font: 700 .95rem/1 var(--cond); padding: 4px 8px; border-radius: 999px; background: var(--sunk); white-space: nowrap; }
+.days.old { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.hist { display: flex; align-items: flex-end; gap: 4px; height: 54px; margin: 6px 0 12px; }
+.hist .b { flex: 1; display: grid; grid-template-rows: 1fr auto; gap: 3px; height: 100%; align-items: end; text-align: center; font-size: .7rem; color: var(--muted); }
+.hist .b i { display: block; border-radius: 3px 3px 0 0; background: var(--line); min-height: 2px; }
+.hist .b.hi i { background: var(--primary); }
+.viewtoggle { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--surface); }
+.viewtoggle button { border: 0; background: transparent; padding: 5px 12px; border-radius: 999px; font-size: .85rem; color: var(--muted); }
+.viewtoggle button[aria-pressed=true] { background: var(--ink); color: var(--paper); }
+.app-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.app-table th { text-align: left; font-weight: 600; color: var(--muted); font-size: .8rem; padding: 8px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.app-table th button { border: 0; background: none; padding: 0; font: inherit; color: inherit; }
+.app-table th[aria-sort=ascending] button::after { content: " ↑"; } .app-table th[aria-sort=descending] button::after { content: " ↓"; }
+.app-table td { padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.app-table tr { cursor: pointer; } .app-table tbody tr:hover { background: var(--sunk); }
+.app-table .rs { font-size: .8rem; color: var(--muted); max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.theme-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; color: var(--ink); }
+@media (max-width: 1000px) { .pulse { grid-template-columns: minmax(0, 200px) minmax(0, 1fr); } .pulse > :last-child { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .pulse { grid-template-columns: 1fr; } .app-table .hide-sm { display: none; } }
+
 /* ---------- Scan window ---------- */
 .modal { position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 24px)); max-height: min(86vh, 760px); background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
 .modal-scrim { position: fixed; inset: 0; background: rgba(10, 20, 18, .45); z-index: 50; }
@@ -303,6 +344,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
           <input type="search" id="q" placeholder="Search jobs and companies" aria-label="Search jobs and companies"></label>
         <span class="kbd" aria-hidden="true">/</span>
         <button class="btn" id="run-scan" type="button">Run a scan</button>
+        <button class="theme-btn" id="theme" type="button" aria-label="Colour theme"></button>
       </div>
     </header>
     <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -491,6 +533,8 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
           ['Confidence', j.confidence], ['Eligibility', j.eligibility],
           ['Status', isTracked ? h('span', { class: 'pill ' + statusTone(j.status) }, showStatus(j.status)) : null],
           ['Source', j.source], ['Next action', j.next_action ? `${j.next_action}${j.next_action_due ? ' by ' + day(j.next_action_due) : ''}` : null],
+          ['Applied', j.applied_date ? `${day(j.applied_date)} (${daysSince(j.applied_date)} days ago)` : null],
+          ['Resume used', j.resume || null],
           ['Posted', j.posted ? day(j.posted) : null], ['First seen', j.first_seen ? day(j.first_seen) : null], ['Found', j.date_found ? day(j.date_found) : null],
           ['Priority', co ? co.priority : j.priority], ['TCS BaNCS', co && co.bancs_note ? co.bancs_note : null],
         ]),
@@ -517,6 +561,102 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   const statusTone = (s) => (/^(Offer|Interview|Screening)/.test(s) ? 'ok' : /^(Applied|Shortlisted)/.test(s) ? 'ok' : /^(Rejected|Not a Fit|Withdrawn|Closed)/.test(s) ? 'muted' : 'warn');
   const coTone = (s) => ({ 'Scanned': 'ok', 'Error': 'bad', 'Blocked (needs browser)': 'warn', 'Broken link': 'warn', 'Unreachable': 'warn' }[s] || 'muted');
 
+
+  // ---------- theme ----------
+  const THEME_KEY = 'jobdash-theme-v1';
+  const THEMES = ['auto', 'light', 'dark'];
+  const THEME_ICON = { auto: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>', light: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', dark: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>' };
+  let theme = 'auto'; try { theme = localStorage.getItem(THEME_KEY) || 'auto'; } catch (e) { theme = 'auto'; }
+  function applyTheme() {
+    if (theme === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', theme);
+    const b = document.getElementById('theme'); if (!b) return;
+    b.replaceChildren(svg(THEME_ICON[theme], 18)); b.title = 'Theme: ' + theme + ' (tap to change)'; b.setAttribute('aria-label', 'Colour theme: ' + theme);
+  }
+  document.getElementById('theme').addEventListener('click', () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* per visit */ } applyTheme(); toast('Theme: ' + theme); });
+  applyTheme();
+
+  // ---------- dates ----------
+  const todayIST = () => new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const daysSince = (iso) => { if (!iso) return null; const a = new Date(iso + 'T00:00:00'); const b = new Date(ymd(todayIST()) + 'T00:00:00'); return Math.round((b - a) / 86400000); };
+  const isApplied = (j) => !!j.applied_date && !/^(New|Needs JD|Shortlisted)$/.test(j.status);
+  const GOAL_KEY = 'jobdash-goal-v1';
+  let goal = 10; try { goal = Number(localStorage.getItem(GOAL_KEY)) || 10; } catch (e) { goal = 10; }
+
+  function goalRing() {
+    const tr = (state.data.trackers || []).filter(inRegion);
+    const t = todayIST(); const dow = (t.getDay() + 6) % 7; const mon = new Date(t); mon.setDate(t.getDate() - dow); const monIso = ymd(mon);
+    const n = tr.filter((j) => isApplied(j) && j.applied_date >= monIso).length;
+    const pct = Math.min(1, n / Math.max(1, goal)); const R = 52, C = 2 * Math.PI * R;
+    const ring = h('span', { html: `<svg viewBox="0 0 132 132" aria-hidden="true"><circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--line)" stroke-width="12"/><circle cx="66" cy="66" r="${R}" fill="none" stroke="${n >= goal ? 'var(--ok)' : 'var(--primary)'}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C * pct} ${C}" transform="rotate(-90 66 66)"/></svg>`, style: { position: 'relative', display: 'grid', placeItems: 'center' } });
+    const label = h('span', { style: { position: 'absolute', display: 'grid', justifyItems: 'center' } }, h('span', { class: 'ring-num' }, fmt(n)), h('span', { class: 'ring-sub' }, `of ${goal}`));
+    ring.append(label);
+    const setGoal = (g) => { goal = Math.max(1, Math.min(50, g)); try { localStorage.setItem(GOAL_KEY, String(goal)); } catch (e) { /* per visit */ } render(); };
+    return h('section', { class: 'panel ring-wrap', 'aria-label': 'Weekly goal' },
+      h('h2', { style: { justifySelf: 'start' } }, 'This week'),
+      ring,
+      h('span', { class: 'ring-sub' }, n >= goal ? 'Goal reached. Nice work.' : `${fmt(goal - n)} more application${goal - n === 1 ? '' : 's'} to reach your goal`),
+      h('span', { class: 'goal-edit' }, 'Goal', h('button', { type: 'button', 'aria-label': 'Lower goal', onclick: () => setGoal(goal - 1) }, '−'), h('b', {}, goal), h('button', { type: 'button', 'aria-label': 'Raise goal', onclick: () => setGoal(goal + 1) }, '+')));
+  }
+
+  function activity() {
+    const d = state.data; const tr = (d.trackers || []).filter(inRegion);
+    const applied = {}, found = {};
+    tr.forEach((j) => { if (isApplied(j)) (applied[j.applied_date] ||= []).push(j); });
+    d.scored_jobs.filter(inRegion).forEach((j) => { const k = j.scored_at || ''; if (k) (found[k] ||= []).push(j); });
+    const t = todayIST(); const dow = (t.getDay() + 6) % 7; const start = new Date(t); start.setDate(t.getDate() - dow - 7 * 11);
+    const W = 12, cell = 15, gap = 4, left = 26, top = 16;
+    const days = []; for (let w = 0; w < W; w++) for (let r = 0; r < 7; r++) { const x = new Date(start); x.setDate(start.getDate() + w * 7 + r); days.push({ w, r, iso: ymd(x), future: x > t }); }
+    const shade = (n) => (n === 0 ? 'var(--sunk)' : n === 1 ? 'color-mix(in srgb, var(--primary) 35%, var(--surface))' : n <= 3 ? 'color-mix(in srgb, var(--primary) 65%, var(--surface))' : 'var(--primary)');
+    const width = left + W * (cell + gap), height = top + 7 * (cell + gap);
+    const ns = 'http://www.w3.org/2000/svg';
+    const svgEl = document.createElementNS(ns, 'svg'); svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`); svgEl.setAttribute('role', 'img'); svgEl.setAttribute('aria-label', 'Applications per day, last 12 weeks');
+    ['Mon', '', 'Wed', '', 'Fri', '', ''].forEach((l, r) => { if (!l) return; const tx = document.createElementNS(ns, 'text'); tx.setAttribute('x', 0); tx.setAttribute('y', top + r * (cell + gap) + cell - 3); tx.setAttribute('font-size', 9); tx.setAttribute('fill', 'var(--muted)'); tx.textContent = l; svgEl.append(tx); });
+    let lastMonth = -1;
+    days.forEach((dd) => {
+      const m = Number(dd.iso.slice(5, 7)); if (dd.r === 0 && m !== lastMonth) { lastMonth = m; const tx = document.createElementNS(ns, 'text'); tx.setAttribute('x', left + dd.w * (cell + gap)); tx.setAttribute('y', 10); tx.setAttribute('font-size', 9); tx.setAttribute('fill', 'var(--muted)'); tx.textContent = new Date(dd.iso + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short' }); svgEl.append(tx); }
+      if (dd.future) return;
+      const a = (applied[dd.iso] || []).length, f = (found[dd.iso] || []).length;
+      const rc2 = document.createElementNS(ns, 'rect');
+      Object.entries({ x: left + dd.w * (cell + gap), y: top + dd.r * (cell + gap), width: cell, height: cell, rx: 3, fill: shade(a), class: 'day', tabindex: 0 }).forEach(([k, v]) => rc2.setAttribute(k, v));
+      const tt = document.createElementNS(ns, 'title'); tt.textContent = `${day(dd.iso)}: ${a} application${a === 1 ? '' : 's'}${f ? `, ${f} scored job${f === 1 ? '' : 's'} found` : ''}`; rc2.append(tt);
+      const open = () => dayDrawer(dd.iso, applied[dd.iso] || [], found[dd.iso] || []);
+      rc2.addEventListener('click', open); rc2.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+      svgEl.append(rc2);
+    });
+    const total = tr.filter(isApplied).length;
+    const last30 = tr.filter((j) => isApplied(j) && daysSince(j.applied_date) <= 30).length;
+    const activeDays = Object.keys(applied).length;
+    let streak = 0; for (let i = 0; i < 90; i++) { const x = new Date(t); x.setDate(t.getDate() - i); if (applied[ymd(x)]) streak++; else if (i > 0) break; }
+    return h('section', { class: 'panel heat' },
+      h('h2', {}, 'Your activity'),
+      h('div', { class: 'heat-stats' }, h('span', {}, h('b', {}, fmt(total)), 'applications'), h('span', {}, h('b', {}, fmt(last30)), 'in the last 30 days'), h('span', {}, h('b', {}, fmt(activeDays)), 'active days'), h('span', {}, h('b', {}, fmt(streak)), 'day streak')),
+      svgEl,
+      h('div', { class: 'heat-legend' }, 'Fewer', ...[0, 1, 2, 4].map((n) => h('span', { style: { background: shade(n) } })), 'More'));
+  }
+  function dayDrawer(iso, applied, found) {
+    drawer('var(--primary)', day(iso), h('div', { class: 'muted' }, `${applied.length} application${applied.length === 1 ? '' : 's'}${found.length ? `, ${found.length} scored job${found.length === 1 ? '' : 's'} found` : ''}`),
+      [applied.length ? h('div', {}, h('div', { class: 'muted', style: { fontSize: '.86rem', marginBottom: '4px' } }, 'Applied'), h('div', { class: 'rows' }, applied.map((j) => h('button', { class: 'row', type: 'button', onclick: () => jobDrawer(j, { tracked: true }) }, h('span', { class: 'bar', style: { background: rc(j.region) } }), h('span', { style: { minWidth: 0 } }, h('div', { class: 't' }, j.role), h('div', { class: 'm' }, [j.company, j.location].filter(Boolean).join(', '))), h('span', { class: 'pill ' + statusTone(j.status) }, showStatus(j.status)))))) : null,
+       found.length ? h('div', {}, h('div', { class: 'muted', style: { fontSize: '.86rem', margin: '8px 0 4px' } }, 'Scored jobs found'), h('div', { class: 'rows' }, found.map((j) => jobRow(j, { score: true })))) : null,
+       !applied.length && !found.length ? h('p', { class: 'empty' }, 'Nothing on this day.') : null]);
+  }
+  function followUps() {
+    const tr = (state.data.trackers || []).filter(inRegion).filter((j) => j.status === 'Applied' && j.applied_date && daysSince(j.applied_date) >= 7)
+      .sort((a, b) => a.applied_date.localeCompare(b.applied_date));
+    return h('section', { class: 'panel' },
+      h('h2', {}, 'Follow-ups due'),
+      h('p', { class: 'sub' }, 'Applications with no reply after a week or more, oldest first. A short note to the recruiter often helps.'),
+      tr.length ? h('div', {}, tr.slice(0, 6).map((j) => { const n = daysSince(j.applied_date); return h('button', { class: 'fu-row', type: 'button', onclick: () => jobDrawer(j, { tracked: true }) }, h('span', { style: { minWidth: 0 } }, h('div', { class: 't' }, j.role), h('div', { class: 'm' }, j.company)), h('span', { class: 'days' + (n >= 14 ? ' old' : '') }, `${n}d`)); }),
+        tr.length > 6 ? h('p', { class: 'muted', style: { fontSize: '.84rem', margin: '8px 4px 0' } }, `and ${tr.length - 6} more on My applications`) : null)
+        : h('p', { class: 'empty' }, 'Nothing to chase yet. Applications appear here after 7 days without a reply.'));
+  }
+  function scoreHist(rows) {
+    if (!rows.length) return null;
+    const c = Array.from({ length: 10 }, (_, i) => rows.filter((j) => Math.round(Number(j.score)) === i + 1).length);
+    const m = Math.max(1, ...c);
+    return h('div', { class: 'hist', role: 'img', 'aria-label': 'How new jobs scored, 1 to 10' }, c.map((n, i) => h('span', { class: 'b' + (i + 1 >= 7 ? ' hi' : ''), title: `Score ${i + 1}: ${n} job${n === 1 ? '' : 's'}` }, h('i', { style: { height: `${(n / m) * 100}%` } }), String(i + 1))));
+  }
+
   // ---------- views ----------
   function viewToday() {
     const d = state.data, ss = stages();
@@ -536,6 +676,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const newPanel = h('section', { class: 'panel' },
       h('h2', {}, 'New since the last scan'),
       h('p', { class: 'sub' }, 'Scored jobs first, best match on top. Strong matches (7+) also go to your ATS pipeline inbox.'),
+      scoreHist(scored),
       scored.length || waiting.length ? h('div', { class: 'rows' },
         scored.slice(0, 30).map((j) => jobRow(j, { score: true })),
         waiting.slice(0, 30).map((j) => jobRow(j, { when: (x) => (x.posted ? 'Posted ' + day(x.posted) : 'Not scored yet') })))
@@ -552,7 +693,8 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       h('div', { class: 'legend' }, REGIONS.map((r) => h('span', {}, h('span', { class: 'dot', style: { background: r.color } }), r.id)), h('span', {}, h('span', { class: 'dot', style: { background: 'var(--multi)' } }), 'Several locations')));
     const savedJobs = d.portal_jobs.filter((j) => saved.has(j.key)).filter(inRegion);
     const savedPanel = savedJobs.length ? h('section', { class: 'panel', style: { marginTop: '18px' } }, h('h2', {}, 'Saved jobs'), h('p', { class: 'sub' }, 'Jobs you starred on this device.'), h('div', { class: 'rows' }, savedJobs.slice(0, 12).map((j) => jobRow(j)))) : null;
-    return [pipe, regionRow, h('div', { class: 'cols' }, h('div', {}, newPanel, savedPanel), hiring)];
+    const pulse = h('div', { class: 'pulse' }, goalRing(), activity(), followUps());
+    return [pipe, regionRow, pulse, h('div', { class: 'cols' }, h('div', {}, newPanel, savedPanel), hiring)];
   }
 
   function viewOpen() {
@@ -580,20 +722,39 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   }
 
   function viewApps() {
-    const d = state.data, all = (d.trackers || []).filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location, j.status));
+    const d = state.data, f = state.f, all = (d.trackers || []).filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location, j.status, j.resume));
     if (!(d.trackers || []).length) return h('p', { class: 'empty' }, 'No tracker data yet.');
+    const mode = f.appsView || 'board';
+    const toggle = h('span', { class: 'viewtoggle', role: 'group', 'aria-label': 'View' }, ['board', 'list'].map((m) => h('button', { type: 'button', 'aria-pressed': String(mode === m), onclick: () => { f.appsView = m; render(); } }, m === 'board' ? 'Board' : 'List')));
+    const head = h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' } },
+      h('div', {}, h('h2', {}, 'My applications'), h('p', { class: 'sub' }, mode === 'board' ? 'Every job in your trackers, by stage. Swipe sideways to see every stage. Tap a job for its details.' : 'Applied jobs, newest first. Tap a heading to sort, or a row for details.')), toggle);
+    if (mode === 'list') {
+      const sort = f.appsSort || { k: 'applied_date', dir: -1 };
+      const rows = all.filter(isApplied).map((j) => ({ ...j, waiting: daysSince(j.applied_date) }))
+        .sort((a, b) => { const x = a[sort.k], y = b[sort.k]; return (typeof x === 'number' || typeof y === 'number' ? ((x ?? -1) - (y ?? -1)) : String(x ?? '').localeCompare(String(y ?? ''))) * sort.dir; });
+      const th = (k, label, cls) => h('th', { class: cls, 'aria-sort': sort.k === k ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none' }, h('button', { type: 'button', onclick: () => { f.appsSort = { k, dir: sort.k === k ? -sort.dir : (k === 'applied_date' || k === 'waiting' ? -1 : 1) }; render(); } }, label));
+      return h('section', { class: 'panel' }, head,
+        rows.length ? h('div', { style: { overflowX: 'auto' } }, h('table', { class: 'app-table' },
+          h('thead', {}, h('tr', {}, th('applied_date', 'Applied'), th('waiting', 'Days'), th('role', 'Role'), th('company', 'Company'), th('region', 'Region', 'hide-sm'), th('status', 'Status'), th('resume', 'Resume used', 'hide-sm'))),
+          h('tbody', {}, rows.map((j) => h('tr', { tabindex: 0, onclick: () => jobDrawer(j, { tracked: true }), onkeydown: (e) => { if (e.key === 'Enter') jobDrawer(j, { tracked: true }); } },
+            h('td', { style: { whiteSpace: 'nowrap' } }, day(j.applied_date)), h('td', {}, h('span', { class: 'days' + (j.status === 'Applied' && j.waiting >= 14 ? ' old' : '') }, `${j.waiting}d`)),
+            h('td', {}, h('strong', {}, j.role)), h('td', {}, j.company), h('td', { class: 'hide-sm' }, h('span', { class: 'tag' }, h('span', { class: 'dot', style: { background: rc(j.region) } }), j.region)),
+            h('td', {}, h('span', { class: 'pill ' + statusTone(j.status) }, showStatus(j.status))), h('td', { class: 'rs hide-sm', title: j.resume || '' }, j.resume || '–'))))))
+          : h('p', { class: 'empty' }, 'No applied jobs match.'));
+    }
     const cols = [
       { name: 'To review', match: ['New', 'Needs JD'] }, { name: 'Shortlisted by you', match: ['Shortlisted'] }, { name: 'Applied', match: ['Applied'] },
       { name: 'Interviewing', match: ['Screening', 'Interview'] }, { name: 'Offer', match: ['Offer'] }, { name: 'Closed', match: ['Rejected', 'Not a Fit', 'Withdrawn', 'Closed'] },
     ];
     const board = h('div', { class: 'board' }, cols.map((c) => {
-      const items = all.filter((j) => c.match.includes(grp(j.status))).sort((a, b) => (b.date_found || '').localeCompare(a.date_found || ''));
+      const items = all.filter((j) => c.match.includes(grp(j.status))).sort((a, b) => (b.applied_date || b.date_found || '').localeCompare(a.applied_date || a.date_found || ''));
       return h('section', { class: 'col', 'aria-label': c.name }, h('h3', {}, c.name, h('span', { class: 'num' }, fmt(items.length))),
         items.length ? items.map((j) => h('button', { class: 'tile', type: 'button', style: { '--c': rc(j.region) }, onclick: () => jobDrawer(j, { tracked: true }) },
-          h('span', { class: 't' }, j.role), h('span', { class: 'm' }, j.company), h('span', { class: 'm' }, [showStatus(j.status) !== c.name ? showStatus(j.status) : null, day(j.date_found)].filter(Boolean).join(', '))))
+          h('span', { class: 't' }, j.role), h('span', { class: 'm' }, j.company),
+          h('span', { class: 'm' }, [showStatus(j.status) !== c.name ? showStatus(j.status) : null, j.applied_date ? `applied ${day(j.applied_date)}, ${daysSince(j.applied_date)}d ago` : day(j.date_found)].filter(Boolean).join(', '))))
         : h('p', { class: 'muted', style: { fontSize: '.84rem', margin: '4px' } }, 'None'));
     }));
-    return h('section', { class: 'panel' }, h('h2', {}, 'My applications'), h('p', { class: 'sub' }, 'Every job in your Gulf, India, Europe, APAC and Canada trackers, by stage. Swipe sideways to see every stage. Tap a job for its details.'), board);
+    return h('section', { class: 'panel' }, head, board);
   }
 
   function viewCompanies() {
