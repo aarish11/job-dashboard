@@ -2,318 +2,578 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0F5C4F">
 <title>Job Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f7f6f3; --panel: #ffffff; --fg: #1f1e1b; --muted: #6b6860; --line: #e3e0d8;
-  --accent: #2f5d50; --accent-fg: #ffffff; --ok: #2e7d4f; --warn: #a15c00; --bad: #b3261e; --chip: #efede7;
-  --radius: 10px; --gap: 16px;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --paper: #EEF2F1; --surface: #FFFFFF; --sunk: #F5F8F7; --ink: #16302B; --muted: #5E716C; --line: #D3DCD9;
+  --primary: #0F5C4F; --primary-ink: #FFFFFF; --primary-soft: #DCEBE7;
+  --gulf: #B8791E; --india: #4B4FB0; --europe: #1E7C99; --multi: #8A9A96;
+  --ok: #2F7A4A; --warn: #A5620F; --bad: #B4372D;
+  --r-sm: 6px; --r-md: 12px; --r-lg: 18px;
+  --shadow: 0 1px 2px rgba(22, 48, 43, .06), 0 8px 24px rgba(22, 48, 43, .08);
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #161614; --panel: #1f1f1c; --fg: #ecebe7; --muted: #a29f97; --line: #34332f; --accent: #7fb8a5; --accent-fg: #10201b; --ok: #6cc596; --warn: #e3a34f; --bad: #f08c84; --chip: #2a2a26; }
+  :root:not([data-theme="light"]) {
+    --paper: #0F1A18; --surface: #172522; --sunk: #13201D; --ink: #E4EDEA; --muted: #8FA39E; --line: #2A3C38;
+    --primary: #5FC2AA; --primary-ink: #0B1F1A; --primary-soft: #1D3A33;
+    --gulf: #E0A85A; --india: #9A9DF2; --europe: #62BCD6; --multi: #6F827E;
+    --ok: #74C894; --warn: #E4A653; --bad: #F08A80;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
 }
-:root[data-theme="dark"] { --bg: #161614; --panel: #1f1f1c; --fg: #ecebe7; --muted: #a29f97; --line: #34332f; --accent: #7fb8a5; --accent-fg: #10201b; --ok: #6cc596; --warn: #e3a34f; --bad: #f08c84; --chip: #2a2a26; }
+:root[data-theme="dark"] {
+  --paper: #0F1A18; --surface: #172522; --sunk: #13201D; --ink: #E4EDEA; --muted: #8FA39E; --line: #2A3C38;
+  --primary: #5FC2AA; --primary-ink: #0B1F1A; --primary-soft: #1D3A33;
+  --gulf: #E0A85A; --india: #9A9DF2; --europe: #62BCD6; --multi: #6F827E;
+  --ok: #74C894; --warn: #E4A653; --bad: #F08A80;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { margin: 0; background: var(--bg); color: var(--fg); font-size: 15px; line-height: 1.45; }
-a { color: var(--accent); }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 15px/1.5 var(--body); }
+a { color: var(--primary); text-underline-offset: 2px; }
 button, input, select, textarea { font: inherit; color: inherit; }
-.wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
-h1 { font-size: 1.5rem; margin: 0; font-weight: 600; }
-h2 { font-size: 1.1rem; margin: 0 0 4px; font-weight: 600; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+.num { font-family: var(--cond); font-variant-numeric: tabular-nums; }
 .muted { color: var(--muted); }
-.small { font-size: 0.85rem; }
 
-/* Sign-in */
-.login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
-.login-box { width: min(100%, 380px); background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
-.login-box input[type=password], .login-box input[type=text] { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
-.btn { padding: 9px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); cursor: pointer; font-weight: 600; }
-.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); font-weight: 500; }
-.err { color: var(--bad); min-height: 1.2em; }
-.check { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 0.9rem; }
+/* ---------- Sign-in ---------- */
+.login { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 20px; background:
+  linear-gradient(var(--paper), var(--paper)) padding-box; }
+.login-box { width: min(100%, 380px); background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 28px 24px; display: grid; gap: 14px; }
+.login-mark { display: flex; gap: 4px; }
+.login-mark span { width: 28px; height: 6px; border-radius: 3px; }
+.login h1 { font: 700 1.9rem/1.1 var(--cond); margin: 0; letter-spacing: -.01em; }
+.login p { margin: 0; }
+.field { display: grid; gap: 6px; font-size: .9rem; color: var(--muted); }
+.field input { padding: 11px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--sunk); color: var(--ink); font-size: 1rem; }
+.check { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); font-size: .9rem; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 14px; border-radius: var(--r-sm); border: 1px solid var(--primary); background: var(--primary); color: var(--primary-ink); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.btn.quiet { background: transparent; color: var(--ink); border-color: var(--line); font-weight: 500; }
+.btn.on { background: var(--primary-soft); color: var(--ink); border-color: var(--primary); }
+.err { color: var(--bad); min-height: 1.3em; font-size: .9rem; }
 
-/* App */
-header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; margin-bottom: 12px; }
-.tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); margin-bottom: 16px; scrollbar-width: none; }
-.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; cursor: pointer; color: var(--muted); white-space: nowrap; margin-bottom: -1px; }
-.tabs button[aria-selected=true] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
-.seg button { background: transparent; border: 0; padding: 6px 12px; cursor: pointer; color: var(--muted); }
-.seg button + button { border-left: 1px solid var(--line); }
-.seg button[aria-pressed=true] { background: var(--panel); color: var(--fg); font-weight: 600; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.tile, .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; min-width: 0; }
-.tile b { display: block; font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px; }
-.card { margin-bottom: 16px; }
-.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
-.controls input[type=search], .controls select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-width: 0; }
-.controls input[type=search] { flex: 1 1 200px; max-width: 320px; }
-.count { color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
-.list { display: flex; flex-direction: column; gap: 8px; }
-.job { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; }
-.job .title { font-weight: 600; }
-.job .meta { color: var(--muted); font-size: 0.88rem; }
-.job .side { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.job .why { grid-column: 1 / -1; font-size: 0.88rem; }
-.score { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; font-size: 0.78rem; white-space: nowrap; }
+/* ---------- Shell ---------- */
+.shell { max-width: 1240px; margin: 0 auto; padding: 18px 20px 40px; }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.brand { font: 700 1.5rem/1 var(--cond); margin: 0; letter-spacing: -.01em; }
+.brand small { display: block; font: 400 .8rem/1.4 var(--body); color: var(--muted); letter-spacing: 0; margin-top: 4px; }
+.top-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-left: auto; }
+.regions { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; }
+.regions button { border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; font-size: .9rem; }
+.regions button[aria-pressed=true] { background: var(--ink); color: var(--paper); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.search { position: relative; }
+.search input { width: 230px; padding: 8px 12px 8px 32px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.kbd { font-size: .75rem; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+.tabs { display: flex; gap: 2px; margin: 18px 0 20px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.tabs button { border: 0; background: none; padding: 10px 14px; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; display: inline-flex; gap: 8px; align-items: center; }
+.tabs button[aria-selected=true] { color: var(--ink); border-color: var(--ink); font-weight: 600; }
+.badge { font: 600 .75rem/1 var(--cond); background: var(--primary-soft); color: var(--ink); padding: 3px 7px; border-radius: 999px; }
+
+/* ---------- Pipeline strip (the signature piece) ---------- */
+.pipeline { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); overflow: hidden; }
+.stage { position: relative; border: 0; background: transparent; text-align: left; padding: 16px 16px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.stage + .stage { border-left: 1px solid var(--line); }
+.stage:not(:last-child)::after { content: ""; position: absolute; right: -7px; top: 22px; width: 12px; height: 12px; background: var(--surface); border-top: 1px solid var(--line); border-right: 1px solid var(--line); transform: rotate(45deg); z-index: 1; }
+.stage:hover { background: var(--sunk); }
+.stage:hover::after { background: var(--sunk); }
+.stage .label { font-size: .82rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stage .big { font: 700 2.4rem/1 var(--cond); letter-spacing: -.02em; }
+.stage.zero .big { color: var(--muted); opacity: .55; }
+.lane { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--line); }
+.lane span { display: block; height: 100%; }
+.stage .hint { font-size: .78rem; color: var(--muted); min-height: 1.2em; }
+@media (prefers-reduced-motion: no-preference) {
+  .pipeline.play .stage .big, .pipeline.play .lane { animation: rise .6s cubic-bezier(.2,.7,.2,1) both; }
+  .pipeline.play .stage:nth-child(2) .big, .pipeline.play .stage:nth-child(2) .lane { animation-delay: .05s; }
+  .pipeline.play .stage:nth-child(3) .big, .pipeline.play .stage:nth-child(3) .lane { animation-delay: .1s; }
+  .pipeline.play .stage:nth-child(4) .big, .pipeline.play .stage:nth-child(4) .lane { animation-delay: .15s; }
+  .pipeline.play .stage:nth-child(5) .big, .pipeline.play .stage:nth-child(5) .lane { animation-delay: .2s; }
+  .pipeline.play .stage:nth-child(6) .big, .pipeline.play .stage:nth-child(6) .lane { animation-delay: .25s; }
+  .pipeline.play .stage:nth-child(7) .big, .pipeline.play .stage:nth-child(7) .lane { animation-delay: .3s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+
+/* ---------- Region cards ---------- */
+.region-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 18px 0; }
+.rcard { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-md); padding: 14px 16px; text-align: left; display: grid; gap: 10px; border-top: 4px solid var(--c); }
+.rcard[aria-pressed=true] { outline: 2px solid var(--c); outline-offset: -1px; }
+.rcard-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.rcard-head strong { font: 600 1.15rem/1.2 var(--cond); }
+.rcard-head span { font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rcard dl { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rcard dt { font-size: .76rem; color: var(--muted); }
+.rcard dd { margin: 0; font: 700 1.5rem/1.1 var(--cond); }
+
+/* ---------- Panels and lists ---------- */
+.cols { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.panel { background: var(--surface); border-radius: var(--r-md); border: 1px solid var(--line); padding: 16px; min-width: 0; }
+.panel h2 { font: 600 1.15rem/1.25 var(--cond); margin: 0; }
+.panel .sub { font-size: .86rem; color: var(--muted); margin: 4px 0 12px; max-width: 72ch; }
+.panel + .panel { margin-top: 18px; }
+.rows { display: flex; flex-direction: column; }
+.row { display: grid; grid-template-columns: 6px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 6px; border: 0; border-bottom: 1px solid var(--line); background: transparent; text-align: left; width: 100%; border-radius: 0; }
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--sunk); }
+.row .bar { width: 6px; align-self: stretch; border-radius: 3px; }
+.row .t { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.row .m { font-size: .86rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .r { display: flex; align-items: center; gap: 8px; }
+.row .when { font-size: .8rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.star { border: 0; background: none; padding: 4px; color: var(--muted); line-height: 0; border-radius: 6px; }
+.star[aria-pressed=true] { color: var(--gulf); }
+.pill { display: inline-block; font-size: .76rem; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
 .pill.ok { color: var(--ok); } .pill.warn { color: var(--warn); } .pill.bad { color: var(--bad); } .pill.muted { color: var(--muted); }
-.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--chip); font-size: 0.78rem; }
-.table-wrap { overflow: auto; max-height: 70vh; border: 1px solid var(--line); border-radius: 8px; }
-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { position: sticky; top: 0; background: var(--panel); color: var(--muted); font-weight: 600; white-space: nowrap; cursor: pointer; }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.bars { display: flex; flex-direction: column; gap: 6px; }
-.bar { display: grid; grid-template-columns: minmax(90px, 11rem) 1fr 3rem; gap: 8px; align-items: center; font-size: 0.88rem; }
-.bar .track { height: 10px; background: var(--chip); border-radius: 999px; overflow: hidden; }
-.bar .fill { height: 100%; background: var(--accent); border-radius: 999px; }
-.bar .n { text-align: right; font-variant-numeric: tabular-nums; }
-.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
-textarea.prompt { width: 100%; min-height: 240px; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
-.more { margin-top: 10px; }
-.empty { padding: 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); }
-footer { color: var(--muted); font-size: 0.8rem; margin: 24px 0 8px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
-@media (max-width: 600px) {
-  .wrap { padding: 12px; }
-  .job { grid-template-columns: 1fr; }
-  .job .side { flex-direction: row; justify-content: flex-start; align-items: center; text-align: left; flex-wrap: wrap; }
-  .tile b { font-size: 1.3rem; }
+.tag { display: inline-flex; align-items: center; gap: 5px; font-size: .76rem; padding: 2px 8px; border-radius: 999px; background: var(--sunk); border: 1px solid var(--line); white-space: nowrap; }
+.score { font: 700 1.35rem/1 var(--cond); min-width: 2ch; text-align: right; }
+.empty { border: 1px dashed var(--line); border-radius: var(--r-sm); padding: 18px; color: var(--muted); }
+.more { margin-top: 12px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: .86rem; color: var(--muted); }
+.chip[aria-pressed=true] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.controls select { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); max-width: 100%; }
+.count { font-size: .84rem; color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* Hiring bars */
+.hbars { display: grid; gap: 4px; }
+.hbar { display: grid; grid-template-columns: minmax(0, 9rem) 1fr 2.6rem; gap: 10px; align-items: center; padding: 5px 6px; border: 0; background: transparent; text-align: left; border-radius: var(--r-sm); font-size: .88rem; }
+.hbar:hover { background: var(--sunk); }
+.hbar .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbar .tr { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--sunk); }
+.hbar .tr span { display: block; height: 100%; }
+.hbar .n { text-align: right; font: 600 1rem/1 var(--cond); }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .8rem; color: var(--muted); margin-top: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Application board */
+.board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; }
+.col { background: var(--sunk); border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px; scroll-snap-align: start; min-height: 120px; }
+.col h3 { font: 600 1rem/1.2 var(--cond); margin: 2px 4px 10px; display: flex; justify-content: space-between; }
+.col h3 .num { color: var(--muted); }
+.tile { display: grid; gap: 4px; width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: var(--r-sm); padding: 9px 10px; margin-bottom: 8px; }
+.tile:hover { border-color: var(--primary); border-left-color: var(--c); }
+.tile .t { font-weight: 600; font-size: .92rem; }
+.tile .m { font-size: .8rem; color: var(--muted); }
+
+/* Company list */
+.co-row { display: grid; grid-template-columns: minmax(0, 1.6fr) 3rem minmax(0, 1fr) minmax(0, 1.1fr) 3.5rem; gap: 10px; align-items: center; padding: 9px 6px; border: 0; border-bottom: 1px solid var(--line); background: transparent; width: 100%; text-align: left; font-size: .9rem; }
+.co-row:hover { background: var(--sunk); }
+.co-row.head { font-size: .8rem; color: var(--muted); cursor: default; }
+.co-row.head:hover { background: transparent; }
+.co-row .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.co-row .rg { display: flex; gap: 4px; }
+.co-row .roles { text-align: right; font: 600 1rem/1 var(--cond); }
+
+textarea.prompt { width: 100%; min-height: 260px; font: .82rem/1.5 ui-monospace, Consolas, monospace; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--sunk); color: var(--ink); }
+
+/* ---------- Detail drawer ---------- */
+.scrim { position: fixed; inset: 0; background: rgba(10, 20, 18, .35); z-index: 40; }
+.drawer { position: fixed; z-index: 41; top: 0; right: 0; bottom: 0; width: min(440px, 100%); background: var(--surface); box-shadow: var(--shadow); display: flex; flex-direction: column; }
+.drawer header { padding: 18px 20px 12px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; border-top: 5px solid var(--c, var(--primary)); }
+.drawer h2 { font: 700 1.35rem/1.2 var(--cond); margin: 0; }
+.drawer .close { position: absolute; top: 14px; right: 14px; border: 0; background: var(--sunk); border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; }
+.drawer .body { padding: 16px 20px; overflow: auto; display: grid; gap: 16px; align-content: start; }
+.drawer dl { display: grid; grid-template-columns: 8rem 1fr; gap: 8px 12px; margin: 0; font-size: .92rem; }
+.drawer dt { color: var(--muted); }
+.drawer dd { margin: 0; }
+.drawer .actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--line); margin-top: auto; }
+.why { background: var(--sunk); border-radius: var(--r-sm); padding: 12px; font-size: .92rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .drawer { animation: slide .22s cubic-bezier(.2,.7,.2,1); }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+
+footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; color: var(--muted); font-size: .82rem; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 9px 14px; border-radius: 999px; font-size: .88rem; z-index: 60; box-shadow: var(--shadow); }
+
+/* ---------- Bottom nav (phones) ---------- */
+.bottom-nav { display: none; }
+@media (max-width: 860px) {
+  .pipeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stage:nth-child(5) { border-left: 0; }
+  .stage:hover { background: transparent; }
+  .stage:nth-child(n+5) { border-top: 1px solid var(--line); }
+  .stage:nth-child(4)::after { display: none; }
+  .cols { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { font-size: 15px; }
+  .shell { padding: 14px 14px calc(84px + env(safe-area-inset-bottom)); }
+  .top-tools { margin-left: 0; width: 100%; }
+  .search { flex: 1; }
+  .search input { width: 100%; }
+  .kbd { display: none; }
+  .tabs { display: none; }
+  .regions { width: 100%; justify-content: space-between; }
+  .regions button { flex: 1; justify-content: center; padding: 7px 6px; }
+  .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 14px; }
+  .stage { padding: 12px; }
+  .stage::after { display: none; }
+  .stage + .stage { border-left: 0; }
+  .stage:first-child { grid-column: 1 / -1; }
+  .stage:nth-child(odd):not(:first-child) { border-left: 1px solid var(--line); }
+  .stage:nth-child(n+2) { border-top: 1px solid var(--line); }
+  .stage .big { font-size: 2rem; }
+  .region-row { grid-template-columns: 1fr; gap: 10px; }
+  .co-row { grid-template-columns: minmax(0, 1fr) 2.6rem 3rem; }
+  .co-row > :nth-child(3), .co-row > :nth-child(4) { display: none; }
+  .row { grid-template-columns: 5px minmax(0, 1fr) auto; gap: 10px; }
+  .row .when { display: none; }
+  .drawer { top: auto; left: 0; width: 100%; max-height: 88vh; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  .drawer dl { grid-template-columns: 6.5rem 1fr; }
+  .drawer .actions { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+  @media (prefers-reduced-motion: no-preference) { .drawer { animation: up .25s cubic-bezier(.2,.7,.2,1); } @keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } } }
+  .bottom-nav { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+  .bottom-nav button { border: 0; background: none; display: grid; justify-items: center; gap: 2px; font-size: .7rem; color: var(--muted); padding: 4px 0; }
+  .bottom-nav button svg { width: 22px; height: 22px; }
+  .bottom-nav button[aria-selected=true] { color: var(--primary); font-weight: 600; }
+  .toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
 }
 </style>
 </head>
 <body>
+
 <div id="login" class="login">
-  <div class="login-box">
+  <form class="login-box" id="login-form" onsubmit="return false">
+    <div class="login-mark" aria-hidden="true"><span style="background:var(--gulf)"></span><span style="background:var(--india)"></span><span style="background:var(--europe)"></span></div>
     <h1>Job Dashboard</h1>
-    <p class="muted small">Private. Enter your username and password to unlock.</p>
-    <input type="text" id="user" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Username" aria-label="Username">
-    <input type="password" id="pw" autocomplete="current-password" placeholder="Password" aria-label="Password">
+    <p class="muted">Your job search across the Gulf, India and Europe. Sign in to unlock it.</p>
+    <label class="field">Username<input type="text" id="user" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
+    <label class="field">Password<input type="password" id="pw" autocomplete="current-password"></label>
     <label class="check"><input type="checkbox" id="remember"> Keep me signed in on this device</label>
-    <button class="btn" id="unlock" type="button">Unlock</button>
-    <p class="err small" id="err" role="alert"></p>
-  </div>
+    <button class="btn" id="unlock" type="submit">Sign in</button>
+    <p class="err" id="err" role="alert"></p>
+  </form>
 </div>
 
-<div id="app" class="wrap" hidden>
-  <header class="top">
-    <div>
-      <h1>Job Dashboard</h1>
-      <p class="muted small" id="scan-line"></p>
-    </div>
-    <div class="seg" id="region" role="group" aria-label="Region">
-      <button type="button" data-r="All" aria-pressed="true">All</button>
-      <button type="button" data-r="Gulf" aria-pressed="false">Gulf</button>
-      <button type="button" data-r="India" aria-pressed="false">India</button>
-      <button type="button" data-r="Europe" aria-pressed="false">Europe</button>
-    </div>
-  </header>
-  <nav class="tabs" role="tablist">
-    <button type="button" role="tab" data-tab="new" aria-selected="true">New jobs</button>
-    <button type="button" role="tab" data-tab="open" aria-selected="false">Open roles</button>
-    <button type="button" role="tab" data-tab="trackers" aria-selected="false">My trackers</button>
-    <button type="button" role="tab" data-tab="companies" aria-selected="false">Companies</button>
-    <button type="button" role="tab" data-tab="chatgpt" aria-selected="false">ChatGPT handoff</button>
-  </nav>
-  <main id="view"></main>
-  <footer>
-    <span id="gen-line"></span>
-    <span><button class="btn ghost" id="lock" type="button">Lock</button></span>
-  </footer>
+<div id="app" hidden>
+  <div class="shell">
+    <header class="top">
+      <h1 class="brand">Job Dashboard<small id="scan-line"></small></h1>
+      <div class="top-tools">
+        <div class="regions" role="group" aria-label="Region" id="regions"></div>
+        <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="q" placeholder="Search jobs and companies" aria-label="Search jobs and companies"></label>
+        <span class="kbd" aria-hidden="true">/</span>
+      </div>
+    </header>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+    <main id="view"></main>
+    <footer><span id="gen-line"></span><span><button class="btn quiet" id="lock" type="button">Sign out</button></span></footer>
+  </div>
+  <nav class="bottom-nav" role="tablist" id="bottom-nav" aria-label="Pages"></nav>
 </div>
+
+<div id="drawer-root"></div>
 
 <script>
 (() => {
-  const STORE_KEY = 'jobdash-key-v1';
-  const state = { tab: 'new', region: 'All', data: null, q: {}, sort: {}, limit: {} };
+  const STORE_KEY = 'jobdash-key-v1', SAVED_KEY = 'jobdash-saved-v1', HIDDEN_KEY = 'jobdash-hidden-v1';
+  const REGIONS = [
+    { id: 'Gulf', tz: 'Asia/Dubai', city: 'Dubai', color: 'var(--gulf)' },
+    { id: 'India', tz: 'Asia/Kolkata', city: 'Delhi', color: 'var(--india)' },
+    { id: 'Europe', tz: 'Europe/Luxembourg', city: 'Luxembourg', color: 'var(--europe)' },
+  ];
+  const RCOLOR = { Gulf: 'var(--gulf)', India: 'var(--india)', Europe: 'var(--europe)' };
+  const rc = (r) => RCOLOR[r] || 'var(--multi)';
+  const TABS = [
+    { id: 'today', label: 'Today', icon: '<path d="M3 12h4l3 8 4-16 3 8h4"/>' },
+    { id: 'open', label: 'Open roles', icon: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>' },
+    { id: 'apps', label: 'My applications', short: 'Applied', icon: '<path d="M9 11l3 3L21 5"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>' },
+    { id: 'companies', label: 'Companies', icon: '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/>' },
+    { id: 'chatgpt', label: 'ChatGPT handoff', short: 'ChatGPT', icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+  ];
+  const state = { tab: 'today', region: 'All', q: '', data: null, f: {}, limit: {}, played: false };
+  let saved = new Set(), hidden = new Set();
+
+  // ---------- small helpers ----------
   const $ = (s, el = document) => el.querySelector(s);
-  const el = (tag, attrs = {}, ...kids) => {
+  const h = (tag, attrs = {}, ...kids) => {
     const n = document.createElement(tag);
-    for (const [k, v] of Object.entries(attrs)) {
+    for (const [k, v] of Object.entries(attrs || {})) {
       if (v == null || v === false) continue;
-      if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v;
-      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v === true ? '' : v);
+      if (k === 'class') n.className = v;
+      else if (k === 'style' && typeof v === 'object') Object.assign(n.style, v);
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else if (k === 'html') n.innerHTML = v; // only ever used with constant SVG markup
+      else n.setAttribute(k, v === true ? '' : v);
     }
-    kids.flat().forEach((c) => c != null && n.append(c.nodeType ? c : document.createTextNode(String(c))));
+    kids.flat(Infinity).forEach((c) => c != null && c !== false && n.append(c.nodeType ? c : document.createTextNode(String(c))));
     return n;
   };
-  const fmt = (n) => (n == null || n === '' ? '' : Number(n).toLocaleString('en-IN'));
-  const day = (iso) => { if (!iso) return ''; const d = new Date(iso.length <= 10 ? iso + 'T00:00:00Z' : iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+  const svg = (paths, size = 18) => h('span', { 'aria-hidden': 'true', style: { lineHeight: 0, display: 'inline-flex' }, html: `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>` });
+  const STAR = '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/>';
+  const fmt = (n) => (n == null || n === '' ? '–' : Number(n).toLocaleString('en-IN'));
+  const day = (iso) => { if (!iso) return ''; const d = new Date(String(iso).length <= 10 ? iso + 'T00:00:00Z' : iso); return isNaN(d) ? String(iso) : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); };
   const when = (iso) => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString('en-GB', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' IST'; };
-  const safeUrl = (u) => (u && /^https?:\/\//i.test(u) ? u : null);
-  const link = (u, label = 'Open posting') => (safeUrl(u) ? el('a', { href: u, target: '_blank', rel: 'noopener noreferrer' }, label) : null);
+  const clock = (tz) => new Date().toLocaleTimeString('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit' });
+  const safe = (u) => (u && /^https?:\/\//i.test(u) ? u : null);
   const inRegion = (r) => state.region === 'All' || r.region === state.region || (r.regions || '').includes(state.region);
-  const TONE = { 'Scanned': 'ok', 'Error': 'bad', 'Blocked (needs browser)': 'warn', 'Broken link': 'warn', 'Unreachable': 'warn' };
-  const STATUS_TONE = (s) => (/^(Applied|Screening|Interview|Offer|Shortlisted)/.test(s) ? 'ok' : /^(Rejected|Not a Fit|Withdrawn|Closed)/.test(s) ? 'muted' : 'warn');
+  const matchQ = (...f) => { const q = state.q.trim().toLowerCase(); return !q || f.join(' ').toLowerCase().includes(q); };
+  const load = (k) => { try { return new Set(JSON.parse(localStorage.getItem(k) || '[]')); } catch (e) { return new Set(); } };
+  const store = (k, set) => { try { localStorage.setItem(k, JSON.stringify([...set])); } catch (e) { /* storage off: keeps for this visit */ } };
+  let toastT = null;
+  const toast = (msg) => { document.querySelectorAll('.toast').forEach((t) => t.remove()); const t = h('div', { class: 'toast', role: 'status' }, msg); document.body.append(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 2200); };
+  const grp = (s) => { s = String(s || ''); if (s.startsWith('Rejected')) return 'Rejected'; return s; };
 
-  // ---------- Decryption ----------
+  // ---------- decryption ----------
   const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
-  async function deriveKey(password, payload) {
-    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
-    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(payload.salt), iterations: payload.iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
+  let payloadP = null;
+  const getPayload = () => (payloadP ||= fetch('data.enc.json', { cache: 'no-store' }).then((r) => { if (!r.ok) throw new Error('data'); return r.json(); }));
+  async function deriveKey(secret, p) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(p.salt), iterations: p.iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
   }
-  async function decrypt(key, payload) {
-    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(payload.iv) }, key, b64(payload.ct));
-    return JSON.parse(new TextDecoder().decode(plain));
-  }
-  let payloadPromise = null;
-  const getPayload = () => (payloadPromise ||= fetch('data.enc.json', { cache: 'no-store' }).then((r) => { if (!r.ok) throw new Error('data'); return r.json(); }));
-
-  async function unlockWith(key, payload) {
-    state.data = await decrypt(key, payload);
+  async function open(key, p) {
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(p.iv) }, key, b64(p.ct));
+    state.data = JSON.parse(new TextDecoder().decode(plain));
+    saved = load(SAVED_KEY); hidden = load(HIDDEN_KEY);
     $('#login').hidden = true; $('#app').hidden = false;
     render();
   }
   async function tryStored() {
-    let raw = null;
-    try { raw = localStorage.getItem(STORE_KEY); } catch (e) { raw = null; }
+    let raw = null; try { raw = localStorage.getItem(STORE_KEY); } catch (e) { raw = null; }
     if (!raw) return;
     try {
-      const payload = await getPayload();
-      const stored = JSON.parse(raw);
-      if (stored.salt !== payload.salt) throw new Error('stale');
-      const key = await crypto.subtle.importKey('raw', b64(stored.k), { name: 'AES-GCM' }, true, ['decrypt']);
-      await unlockWith(key, payload);
+      const p = await getPayload(); const s = JSON.parse(raw);
+      if (s.salt !== p.salt) throw new Error('stale');
+      await open(await crypto.subtle.importKey('raw', b64(s.k), { name: 'AES-GCM' }, true, ['decrypt']), p);
     } catch (e) { try { localStorage.removeItem(STORE_KEY); } catch (e2) { /* ignore */ } }
   }
-  async function unlock() {
-    const pw = $('#pw').value; const user = $('#user').value.trim().toLowerCase(); $('#err').textContent = '';
+  $('#login-form').addEventListener('submit', async () => {
+    const user = $('#user').value.trim().toLowerCase(), pw = $('#pw').value; $('#err').textContent = '';
     if (!user || !pw) { $('#err').textContent = 'Enter your username and password.'; return; }
-    $('#unlock').disabled = true; $('#unlock').textContent = 'Unlocking…';
+    const btn = $('#unlock'); btn.disabled = true; btn.textContent = 'Signing in…';
     try {
-      const payload = await getPayload();
-      const key = await deriveKey(user + '\n' + pw, payload);
-      await unlockWith(key, payload);
-      if ($('#remember').checked) {
-        const k = new Uint8Array(await crypto.subtle.exportKey('raw', key));
-        try { localStorage.setItem(STORE_KEY, JSON.stringify({ salt: payload.salt, k: btoa(String.fromCharCode(...k)) })); } catch (e) { /* storage off: stay signed in for this visit only */ }
-      }
+      const p = await getPayload(); const key = await deriveKey(user + '\n' + pw, p);
+      await open(key, p);
+      if ($('#remember').checked) { const k = new Uint8Array(await crypto.subtle.exportKey('raw', key)); try { localStorage.setItem(STORE_KEY, JSON.stringify({ salt: p.salt, k: btoa(String.fromCharCode(...k)) })); } catch (e) { /* stays signed in for this visit */ } }
       $('#pw').value = ''; $('#user').value = '';
-    } catch (e) {
-      $('#err').textContent = e.message === 'data' ? 'Could not load the data. Check your connection and reload.' : 'Wrong username or password.';
-    } finally { $('#unlock').disabled = false; $('#unlock').textContent = 'Unlock'; }
+    } catch (e) { $('#err').textContent = e.message === 'data' ? 'The data did not load. Check your connection and reload the page.' : 'Wrong username or password.'; }
+    finally { btn.disabled = false; btn.textContent = 'Sign in'; }
+  });
+  $('#lock').addEventListener('click', () => { try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ } state.data = null; closeDrawer(); $('#view').replaceChildren(); $('#app').hidden = true; $('#login').hidden = false; });
+
+  // ---------- chrome ----------
+  function chrome() {
+    const regions = $('#regions'); regions.replaceChildren(
+      h('button', { type: 'button', 'aria-pressed': String(state.region === 'All'), onclick: () => setRegion('All') }, 'All'),
+      ...REGIONS.map((r) => h('button', { type: 'button', 'aria-pressed': String(state.region === r.id), onclick: () => setRegion(r.id) }, h('span', { class: 'dot', style: { background: r.color } }), r.id)));
+    const counts = tabCounts();
+    $('#tabs').replaceChildren(...TABS.map((t) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.id), onclick: () => go(t.id) }, t.label, counts[t.id] != null ? h('span', { class: 'badge' }, fmt(counts[t.id])) : null)));
+    $('#bottom-nav').replaceChildren(...TABS.map((t) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.id), onclick: () => go(t.id) }, svg(t.icon, 22), t.short || t.label)));
+    const d = state.data, m = d.scan_meta && d.scan_meta[0];
+    $('#scan-line').textContent = m ? `Last scan ${when(m.started)}` : '';
+    $('#gen-line').textContent = `Site updated ${when(d.generated)}. Saved and hidden jobs are remembered on this device only.`;
   }
-  $('#unlock').addEventListener('click', unlock);
-  $('#user').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#pw').focus(); });
-  $('#pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
-  $('#lock').addEventListener('click', () => { try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ } state.data = null; $('#app').hidden = true; $('#login').hidden = false; $('#view').replaceChildren(); });
+  function tabCounts() {
+    const d = state.data;
+    return { today: null, open: d.portal_jobs.filter(inRegion).length, apps: (d.trackers || []).filter(inRegion).length, companies: d.companies.filter(inRegion).length, chatgpt: d.companies.filter((c) => c.scan_status !== 'Scanned').filter(inRegion).length };
+  }
+  const setRegion = (r) => { state.region = r; state.limit = {}; render(); };
+  function go(tab, filters) { state.tab = tab; if (filters) Object.assign(state.f, filters); state.limit = {}; history.replaceState(null, '', '#' + tab); render(); window.scrollTo({ top: 0 }); }
 
-  // ---------- Navigation ----------
-  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => { state.tab = b.dataset.tab; history.replaceState(null, '', '#' + state.tab); render(); }));
-  document.querySelectorAll('#region button').forEach((b) => b.addEventListener('click', () => { state.region = b.dataset.r; render(); }));
-  const fromHash = location.hash.slice(1);
-  if (['new', 'open', 'trackers', 'companies', 'chatgpt'].includes(fromHash)) state.tab = fromHash;
+  // ---------- data shaping ----------
+  function stages() {
+    const d = state.data, tr = (d.trackers || []).filter(inRegion);
+    const split = (rows) => REGIONS.map((r) => [r.id, rows.filter((x) => x.region === r.id).length]).concat([['Other', rows.filter((x) => !RCOLOR[x.region]).length]]);
+    const st = (names) => tr.filter((j) => names.includes(grp(j.status)));
+    const open = d.portal_jobs.filter(inRegion), waiting = (d.waiting_jobs || []).filter(inRegion), scored = d.scored_jobs.filter(inRegion);
+    return [
+      { id: 'open', label: 'Open roles', rows: open, hint: 'at your target companies', go: () => go('open') },
+      { id: 'new', label: 'New this scan', rows: waiting.concat(scored), hint: `${fmt(waiting.length)} waiting to be scored`, go: () => go('today') },
+      { id: 'scored', label: 'Scored 7+', rows: scored.filter((j) => Number(j.score) >= 7), hint: 'strong matches', go: () => go('today') },
+      { id: 'short', label: 'Shortlisted', rows: st(['Shortlisted', 'New', 'Needs JD']), hint: 'in your trackers', go: () => go('apps') },
+      { id: 'applied', label: 'Applied', rows: st(['Applied']), hint: '', go: () => go('apps') },
+      { id: 'int', label: 'Interviews', rows: st(['Screening', 'Interview']), hint: '', go: () => go('apps') },
+      { id: 'offer', label: 'Offers', rows: st(['Offer']), hint: '', go: () => go('apps') },
+    ].map((s) => ({ ...s, split: split(s.rows) }));
+  }
+  const lane = (split, total) => h('div', { class: 'lane', 'aria-hidden': 'true' }, total ? split.filter(([, n]) => n).map(([r, n]) => h('span', { style: { width: (n / total * 100) + '%', background: rc(r) } })) : null);
 
-  // ---------- Views ----------
-  const searchBox = (key, placeholder) => el('input', { type: 'search', placeholder, value: state.q[key] || '', 'aria-label': placeholder, oninput: (e) => { state.q[key] = e.target.value; state.limit[key] = 0; renderSoon(); } });
-  const select = (key, label, options) => {
-    const s = el('select', { 'aria-label': label, onchange: (e) => { state.q[key] = e.target.value; state.limit[key] = 0; render(); } });
-    options.forEach(([v, t]) => s.append(el('option', { value: v }, t)));
-    s.value = state.q[key] || '';
-    return s;
-  };
-  const toggle = (key, label) => el('label', { class: 'check' }, el('input', { type: 'checkbox', checked: !!state.q[key], onchange: (e) => { state.q[key] = e.target.checked; state.limit[key] = 0; render(); } }), label);
-  let t = null; const renderSoon = () => { clearTimeout(t); t = setTimeout(() => { const f = document.activeElement; const pos = f && f.selectionStart; render(); if (f && f.type === 'search') { const again = [...document.querySelectorAll('input[type=search]')].find((x) => x.getAttribute('aria-label') === f.getAttribute('aria-label')); if (again) { again.focus(); again.setSelectionRange(pos, pos); } } }, 150); };
-  const showMore = (key, total, shown) => (shown < total ? el('div', { class: 'more' }, el('button', { class: 'btn ghost', type: 'button', onclick: () => { state.limit[key] = shown + 100; render(); } }, `Show more (${fmt(total - shown)} left)`)) : null);
-  const qMatch = (key, ...fields) => { const q = (state.q[key] || '').trim().toLowerCase(); return !q || fields.join(' ').toLowerCase().includes(q); };
+  // ---------- rows ----------
+  function starBtn(key) {
+    const on = saved.has(key);
+    return h('button', { class: 'star', type: 'button', 'aria-pressed': String(on), 'aria-label': on ? 'Remove from saved' : 'Save job', title: on ? 'Saved' : 'Save', onclick: (e) => { e.stopPropagation(); toggleSaved(key); } }, svg(STAR.replace('<path', `<path fill="${on ? 'currentColor' : 'none'}"`), 18));
+  }
+  function toggleSaved(key) { if (saved.has(key)) { saved.delete(key); toast('Removed from saved'); } else { saved.add(key); toast('Saved'); } store(SAVED_KEY, saved); render(); }
+  function toggleHidden(key) { if (hidden.has(key)) { hidden.delete(key); toast('Job shown again'); } else { hidden.add(key); toast('Job hidden'); } store(HIDDEN_KEY, hidden); }
+  function jobRow(j, opts = {}) {
+    return h('button', { class: 'row', type: 'button', onclick: () => jobDrawer(j, opts) },
+      h('span', { class: 'bar', style: { background: rc(j.region) } }),
+      h('span', { style: { minWidth: 0 } }, h('div', { class: 't' }, j.role), h('div', { class: 'm' }, [j.company, j.location].filter(Boolean).join(', '))),
+      h('span', { class: 'r' }, opts.score && j.score != null ? h('span', { class: 'score num' }, j.score) : null, opts.when ? h('span', { class: 'when' }, opts.when(j)) : null, j.key ? starBtn(j.key) : null));
+  }
+  const moreBtn = (key, total, shown) => (shown < total ? h('div', { class: 'more' }, h('button', { class: 'btn quiet', type: 'button', onclick: () => { state.limit[key] = shown + 60; render(); } }, `Show ${fmt(Math.min(60, total - shown))} more of ${fmt(total - shown)}`)) : null);
 
-  function viewNew(d) {
-    const rows = d.scored_jobs.filter(inRegion)
-      .filter((r) => (Number(r.score) || 0) >= Number(state.q.minScore || 0))
-      .filter((r) => !state.q.newBancs || r.bancs === 'Yes')
-      .filter((r) => qMatch('newQ', r.role, r.company, r.location))
-      .sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
-    const limit = state.limit.newQ || 100;
-    return el('section', { class: 'card' },
-      el('h2', {}, 'New jobs, scored'),
-      el('p', { class: 'muted small' }, 'Posted since the scan before, scored out of 10 against your resume and region rules. 7+ also goes to your ATS pipeline inbox.'),
-      el('div', { class: 'controls' }, searchBox('newQ', 'Search role, company or city'), select('minScore', 'Minimum score', [['', 'Any score'], ['5', '5+'], ['7', '7+'], ['8', '8+']]), toggle('newBancs', 'BaNCS companies only'), el('span', { class: 'count' }, d.scored_jobs.length ? `${fmt(rows.length)} shown` : '')),
-      d.scored_jobs.length === 0
-        ? el('p', { class: 'empty' }, 'No new jobs scored yet. The first scan only recorded jobs that were already open, so new postings appear here from the next scans.')
-        : el('div', { class: 'list' }, rows.slice(0, limit).map((r) => el('article', { class: 'job' },
-            el('div', {}, el('div', { class: 'title' }, r.role), el('div', { class: 'meta' }, [r.company, r.location].filter(Boolean).join(' · '))),
-            el('div', { class: 'side' }, el('span', { class: 'score' }, r.score ?? '–'), r.eligibility ? el('span', { class: 'pill ' + (r.eligibility === 'Pass' ? 'ok' : r.eligibility === 'Fail' ? 'bad' : 'muted') }, r.eligibility) : null, link(r.link)),
-            r.why ? el('div', { class: 'why' }, r.why) : null))),
-      showMore('newQ', rows.length, Math.min(rows.length, limit)));
+  // ---------- drawer ----------
+  let lastFocus = null;
+  function closeDrawer() { $('#drawer-root').replaceChildren(); if (lastFocus) lastFocus.focus(); lastFocus = null; }
+  function drawer(color, title, sub, body, actions) {
+    lastFocus = document.activeElement;
+    const close = h('button', { class: 'close', type: 'button', 'aria-label': 'Close', onclick: closeDrawer }, svg('<path d="M6 6l12 12M18 6L6 18"/>', 16));
+    const panel = h('aside', { class: 'drawer', role: 'dialog', 'aria-modal': 'true', 'aria-label': title, style: { '--c': color } },
+      h('header', {}, h('h2', {}, title), sub, close), h('div', { class: 'body' }, body), actions ? h('div', { class: 'actions' }, actions) : null);
+    $('#drawer-root').replaceChildren(h('div', { class: 'scrim', onclick: closeDrawer }), panel);
+    close.focus();
+  }
+  const dl = (pairs) => h('dl', {}, pairs.filter(([, v]) => v != null && v !== '').map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]));
+  function jobDrawer(j, opts = {}) {
+    const co = state.data.companies.find((c) => c.company === j.company);
+    const link = safe(j.link);
+    const isTracked = opts.tracked;
+    drawer(rc(j.region), j.role,
+      h('div', { class: 'muted' }, [j.company, j.location].filter(Boolean).join(', ')),
+      [
+        j.why ? h('div', { class: 'why' }, j.why) : null,
+        dl([
+          ['Region', h('span', { class: 'tag' }, h('span', { class: 'dot', style: { background: rc(j.region) } }), j.region || '')],
+          ['Match score', j.score != null ? `${j.score} / 10` : null],
+          ['Confidence', j.confidence], ['Eligibility', j.eligibility],
+          ['Status', isTracked ? h('span', { class: 'pill ' + statusTone(j.status) }, j.status) : null],
+          ['Source', j.source], ['Next action', j.next_action ? `${j.next_action}${j.next_action_due ? ' by ' + day(j.next_action_due) : ''}` : null],
+          ['Posted', j.posted ? day(j.posted) : null], ['First seen', j.first_seen ? day(j.first_seen) : null], ['Found', j.date_found ? day(j.date_found) : null],
+          ['Priority', co ? co.priority : j.priority], ['TCS BaNCS', co && co.bancs_note ? co.bancs_note : null],
+        ]),
+        co ? h('button', { class: 'btn quiet', type: 'button', onclick: () => { closeDrawer(); companyDrawer(co); } }, `About ${co.company}`) : null,
+      ],
+      [link ? h('a', { class: 'btn', href: link, target: '_blank', rel: 'noopener noreferrer' }, 'Open posting') : null,
+       j.key && !isTracked ? h('button', { class: 'btn quiet' + (saved.has(j.key) ? ' on' : ''), type: 'button', onclick: () => { toggleSaved(j.key); jobDrawer(j, opts); } }, saved.has(j.key) ? 'Saved' : 'Save') : null,
+       j.key && !isTracked ? h('button', { class: 'btn quiet', type: 'button', onclick: () => { toggleHidden(j.key); closeDrawer(); render(); } }, hidden.has(j.key) ? 'Show again' : 'Hide') : null,
+       link ? h('button', { class: 'btn quiet', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch (e) { toast('Copy did not work here: long-press the Open posting button instead'); } } }, 'Copy link') : null]);
+  }
+  function companyDrawer(c) {
+    const roles = state.data.portal_jobs.filter((j) => j.company === c.company);
+    const regs = c.regions.split(', ').filter(Boolean);
+    drawer(regs.length === 1 ? rc(regs[0]) : 'var(--primary)', c.company,
+      h('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap' } }, regs.map((r) => h('span', { class: 'tag' }, h('span', { class: 'dot', style: { background: rc(r) } }), r)), h('span', { class: 'tag' }, c.priority)),
+      [
+        dl([['Scan status', h('span', { class: 'pill ' + coTone(c.scan_status) }, c.scan_status)], ['Platform', c.platform], ['Open roles', roles.length ? fmt(roles.length) : '0 in the latest scan'], ['Search terms', c.search_terms], ['TCS BaNCS', c.bancs_note || 'No public evidence found']]),
+        roles.length ? h('div', {}, h('div', { class: 'muted', style: { fontSize: '.86rem', marginBottom: '4px' } }, 'Latest roles'), h('div', { class: 'rows' }, roles.slice(0, 6).map((j) => jobRow(j)))) : null,
+      ],
+      [roles.length ? h('button', { class: 'btn', type: 'button', onclick: () => { closeDrawer(); state.q = ''; $('#q').value = ''; go('open', { company: c.company }); } }, `See all ${fmt(roles.length)} roles`) : null,
+       safe(c.careers_url) ? h('a', { class: 'btn quiet', href: c.careers_url, target: '_blank', rel: 'noopener noreferrer' }, 'Careers page') : null]);
+  }
+  const statusTone = (s) => (/^(Offer|Interview|Screening)/.test(s) ? 'ok' : /^(Applied|Shortlisted)/.test(s) ? 'ok' : /^(Rejected|Not a Fit|Withdrawn|Closed)/.test(s) ? 'muted' : 'warn');
+  const coTone = (s) => ({ 'Scanned': 'ok', 'Error': 'bad', 'Blocked (needs browser)': 'warn', 'Broken link': 'warn', 'Unreachable': 'warn' }[s] || 'muted');
+
+  // ---------- views ----------
+  function viewToday() {
+    const d = state.data, ss = stages();
+    const pipe = h('section', { class: 'pipeline' + (state.played ? '' : ' play'), 'aria-label': 'Your job pipeline' }, ss.map((s) => h('button', { class: 'stage' + (s.rows.length ? '' : ' zero'), type: 'button', onclick: s.go },
+      h('span', { class: 'label' }, s.label), h('span', { class: 'big num' }, fmt(s.rows.length)), lane(s.split, s.rows.length), h('span', { class: 'hint' }, s.hint))));
+    state.played = true;
+    const tr = d.trackers || [];
+    const regionRow = h('section', { class: 'region-row', 'aria-label': 'Regions' }, REGIONS.map((r) => {
+      const roles = d.portal_jobs.filter((j) => j.region === r.id).length;
+      const mine = tr.filter((j) => j.region === r.id);
+      return h('button', { class: 'rcard', type: 'button', 'aria-pressed': String(state.region === r.id), style: { '--c': r.color }, onclick: () => setRegion(state.region === r.id ? 'All' : r.id) },
+        h('div', { class: 'rcard-head' }, h('strong', {}, r.id), h('span', {}, `${r.city} ${clock(r.tz)}`)),
+        h('dl', {}, h('div', {}, h('dt', {}, 'Open roles'), h('dd', {}, fmt(roles))), h('div', {}, h('dt', {}, 'Tracked'), h('dd', {}, fmt(mine.length))), h('div', {}, h('dt', {}, 'Applied'), h('dd', {}, fmt(mine.filter((j) => grp(j.status) === 'Applied').length)))));
+    }));
+    const scored = d.scored_jobs.filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location)).sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
+    const waiting = (d.waiting_jobs || []).filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location));
+    const newPanel = h('section', { class: 'panel' },
+      h('h2', {}, 'New since the last scan'),
+      h('p', { class: 'sub' }, 'Scored jobs first, best match on top. Strong matches (7+) also go to your ATS pipeline inbox.'),
+      scored.length || waiting.length ? h('div', { class: 'rows' },
+        scored.slice(0, 30).map((j) => jobRow(j, { score: true })),
+        waiting.slice(0, 30).map((j) => jobRow(j, { when: (x) => (x.posted ? 'Posted ' + day(x.posted) : 'Not scored yet') })))
+        : h('p', { class: 'empty' }, 'Nothing new yet. Jobs posted after the last scan will appear here.'),
+      waiting.length && !scored.length ? h('p', { class: 'sub', style: { marginTop: '10px' } }, `${fmt(waiting.length)} new jobs are waiting to be scored. Once they are scored, the ones that don't fit drop off this list.`) : null);
+    const byCo = {}; d.portal_jobs.filter(inRegion).forEach((j) => { (byCo[j.company] ||= { Gulf: 0, India: 0, Europe: 0, Other: 0, n: 0 }); byCo[j.company][RCOLOR[j.region] ? j.region : 'Other']++; byCo[j.company].n++; });
+    const top = Object.entries(byCo).sort((a, b) => b[1].n - a[1].n).slice(0, 10), max = top.length ? top[0][1].n : 1;
+    const hiring = h('section', { class: 'panel' },
+      h('h2', {}, 'Who is hiring most'),
+      h('p', { class: 'sub' }, 'Open roles per company in the latest scan. Tap a company to see its roles.'),
+      top.length ? h('div', { class: 'hbars' }, top.map(([name, c]) => h('button', { class: 'hbar', type: 'button', onclick: () => { state.q = ''; $('#q').value = ''; go('open', { company: name }); } },
+        h('span', { class: 'nm' }, name), h('span', { class: 'tr', style: { width: (c.n / max * 100) + '%' } }, ['Gulf', 'India', 'Europe', 'Other'].filter((r) => c[r]).map((r) => h('span', { style: { width: (c[r] / c.n * 100) + '%', background: rc(r) } }))), h('span', { class: 'n' }, fmt(c.n)))))
+        : h('p', { class: 'empty' }, 'No open roles in this region yet.'),
+      h('div', { class: 'legend' }, REGIONS.map((r) => h('span', {}, h('span', { class: 'dot', style: { background: r.color } }), r.id)), h('span', {}, h('span', { class: 'dot', style: { background: 'var(--multi)' } }), 'Several locations')));
+    const savedJobs = d.portal_jobs.filter((j) => saved.has(j.key)).filter(inRegion);
+    const savedPanel = savedJobs.length ? h('section', { class: 'panel', style: { marginTop: '18px' } }, h('h2', {}, 'Saved jobs'), h('p', { class: 'sub' }, 'Jobs you starred on this device.'), h('div', { class: 'rows' }, savedJobs.slice(0, 12).map((j) => jobRow(j)))) : null;
+    return [pipe, regionRow, h('div', { class: 'cols' }, h('div', {}, newPanel, savedPanel), hiring)];
   }
 
-  function viewOpen(d) {
-    const companies = [...new Set(d.portal_jobs.map((r) => r.company))].sort();
+  function viewOpen() {
+    const d = state.data, f = state.f;
+    const companies = [...new Set(d.portal_jobs.filter(inRegion).map((j) => j.company))].sort();
     const rows = d.portal_jobs.filter(inRegion)
-      .filter((r) => !state.q.openCo || r.company === state.q.openCo)
-      .filter((r) => !state.q.openBancs || r.bancs === 'Yes')
-      .filter((r) => qMatch('openQ', r.role, r.company, r.location))
-      .sort((a, b) => (b.first_seen || '').localeCompare(a.first_seen || '') || a.company.localeCompare(b.company));
-    const limit = state.limit.openQ || 100;
-    return el('section', { class: 'card' },
-      el('h2', {}, 'Open roles at your target companies'),
-      el('p', { class: 'muted small' }, 'Every role the latest scan found in your regions that matched your search terms. Not scored, so many will not fit: use it to browse. "Several locations" means the portal did not name one city.'),
-      el('div', { class: 'controls' }, searchBox('openQ', 'Search role, company or city'), select('openCo', 'Company', [['', 'All companies'], ...companies.map((c) => [c, c])]), toggle('openBancs', 'BaNCS companies only'), el('span', { class: 'count' }, `${fmt(rows.length)} of ${fmt(d.portal_jobs.length)}`)),
-      rows.length === 0 ? el('p', { class: 'empty' }, 'No roles match.') :
-      el('div', { class: 'list' }, rows.slice(0, limit).map((r) => el('article', { class: 'job' },
-        el('div', {}, el('div', { class: 'title' }, r.role), el('div', { class: 'meta' }, [r.company, r.location].filter(Boolean).join(' · '))),
-        el('div', { class: 'side' }, el('span', { class: 'chip' }, r.region), r.bancs === 'Yes' ? el('span', { class: 'chip' }, 'BaNCS') : null, el('span', { class: 'meta' }, 'Seen ' + day(r.first_seen)), link(r.link))))),
-      showMore('openQ', rows.length, Math.min(rows.length, limit)));
+      .filter((j) => !f.company || j.company === f.company)
+      .filter((j) => !f.bancs || j.bancs === 'Yes')
+      .filter((j) => !f.savedOnly || saved.has(j.key))
+      .filter((j) => !f.oneCity || j.region !== 'Several locations')
+      .filter((j) => (f.showHidden ? true : !hidden.has(j.key)))
+      .filter((j) => matchQ(j.role, j.company, j.location))
+      .sort(f.sort === 'company' ? (a, b) => a.company.localeCompare(b.company) || a.role.localeCompare(b.role) : f.sort === 'role' ? (a, b) => a.role.localeCompare(b.role) : (a, b) => (b.first_seen || '').localeCompare(a.first_seen || '') || a.company.localeCompare(b.company));
+    const lim = state.limit.open || 60;
+    const chip = (key, label) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(!!f[key]), onclick: () => { f[key] = !f[key]; state.limit = {}; render(); } }, label);
+    const coSel = h('select', { 'aria-label': 'Company', onchange: (e) => { f.company = e.target.value; state.limit = {}; render(); } }, h('option', { value: '' }, 'All companies'), companies.map((c) => h('option', { value: c }, c))); coSel.value = companies.includes(f.company) ? f.company : '';
+    const sortSel = h('select', { 'aria-label': 'Sort', onchange: (e) => { f.sort = e.target.value; render(); } }, h('option', { value: '' }, 'Newest first'), h('option', { value: 'company' }, 'Company A to Z'), h('option', { value: 'role' }, 'Role A to Z')); sortSel.value = f.sort || '';
+    const hiddenCount = d.portal_jobs.filter((j) => hidden.has(j.key)).length;
+    return h('section', { class: 'panel' },
+      h('h2', {}, 'Open roles at your target companies'),
+      h('p', { class: 'sub' }, 'Every role the latest scan found in your regions that matched your search terms. They are not scored, so use this to browse. Tap a role for details, star it to save it, or hide it.'),
+      h('div', { class: 'controls' }, coSel, sortSel, chip('bancs', 'BaNCS companies'), chip('savedOnly', `Saved (${fmt(saved.size)})`), chip('oneCity', 'Hide "several locations"'), hiddenCount ? chip('showHidden', `Show hidden (${fmt(hiddenCount)})`) : null, h('span', { class: 'count' }, `${fmt(rows.length)} roles`)),
+      rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => jobRow(j, { when: (x) => 'Seen ' + day(x.first_seen) }))) : h('p', { class: 'empty' }, 'No roles match these filters. Clear a filter or the search box to see more.'),
+      moreBtn('open', rows.length, Math.min(rows.length, lim)));
   }
 
-  function viewTrackers(d) {
-    const jobs = (d.trackers || []).filter(inRegion);
-    if (!d.trackers || d.trackers.length === 0) return el('p', { class: 'empty' }, 'No tracker data yet.');
-    const grp = (s) => (String(s).startsWith('Rejected') ? 'Rejected' : s);
-    const count = (list) => jobs.filter((j) => list.includes(grp(j.status))).length;
-    const statuses = ['New', 'Needs JD', 'Shortlisted', 'Applied', 'Screening', 'Interview', 'Offer', 'Not a Fit', 'Rejected', 'Withdrawn', 'Closed'];
-    const sc = statuses.map((s) => [s, jobs.filter((j) => grp(j.status) === s).length]).filter(([, n]) => n > 0);
-    const max = Math.max(1, ...sc.map(([, n]) => n));
-    const rows = jobs.filter((r) => qMatch('trkQ', r.role, r.company, r.location, r.status, r.source))
-      .filter((r) => !state.q.trkStatus || grp(r.status) === state.q.trkStatus)
-      .sort((a, b) => (b.date_found || '').localeCompare(a.date_found || ''));
-    return el('div', {},
-      el('div', { class: 'tiles' },
-        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Jobs tracked'), el('b', {}, fmt(jobs.length))),
-        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'To review'), el('b', {}, fmt(count(['New', 'Needs JD'])))),
-        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Shortlisted'), el('b', {}, fmt(count(['Shortlisted'])))),
-        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Applied'), el('b', {}, fmt(count(['Applied'])))),
-        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Interviews'), el('b', {}, fmt(count(['Screening', 'Interview'])))),
-        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Rejected'), el('b', {}, fmt(count(['Rejected']))))),
-      el('div', { class: 'grid2' },
-        el('section', { class: 'card' }, el('h2', {}, 'By status'), el('div', { class: 'bars' }, sc.map(([s, n]) => el('div', { class: 'bar' }, el('span', { class: 'muted' }, s), el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${(n / max) * 100}%;display:block` })), el('span', { class: 'n' }, fmt(n)))))),
-        el('section', { class: 'card' }, el('h2', {}, 'By region'), el('div', { class: 'bars' }, ['Gulf', 'India', 'Europe'].map((r) => { const n = (d.trackers || []).filter((j) => j.region === r).length; const m = Math.max(1, ...['Gulf', 'India', 'Europe'].map((x) => (d.trackers || []).filter((j) => j.region === x).length)); return el('div', { class: 'bar' }, el('span', { class: 'muted' }, r), el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${(n / m) * 100}%;display:block` })), el('span', { class: 'n' }, fmt(n))); })))),
-      el('section', { class: 'card' },
-        el('h2', {}, 'All tracked jobs'),
-        el('div', { class: 'controls' }, searchBox('trkQ', 'Search role, company, city or status'), select('trkStatus', 'Status', [['', 'All statuses'], ...sc.map(([s]) => [s, s])]), el('span', { class: 'count' }, `${fmt(rows.length)} shown`)),
-        el('div', { class: 'list' }, rows.map((r) => el('article', { class: 'job' },
-          el('div', {}, el('div', { class: 'title' }, r.role), el('div', { class: 'meta' }, [r.company, r.location, r.source].filter(Boolean).join(' · ')), r.next_action ? el('div', { class: 'meta' }, `Next: ${r.next_action}${r.next_action_due ? ' (by ' + day(r.next_action_due) + ')' : ''}`) : null),
-          el('div', { class: 'side' }, el('span', { class: 'pill ' + STATUS_TONE(r.status) }, r.status), r.score != null ? el('span', { class: 'meta' }, 'Score ' + r.score) : null, el('span', { class: 'meta' }, day(r.date_found)), link(r.link)))))));
+  function viewApps() {
+    const d = state.data, all = (d.trackers || []).filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location, j.status));
+    if (!(d.trackers || []).length) return h('p', { class: 'empty' }, 'No tracker data yet.');
+    const cols = [
+      { name: 'To review', match: ['New', 'Needs JD'] }, { name: 'Shortlisted', match: ['Shortlisted'] }, { name: 'Applied', match: ['Applied'] },
+      { name: 'Interviewing', match: ['Screening', 'Interview'] }, { name: 'Offer', match: ['Offer'] }, { name: 'Closed', match: ['Rejected', 'Not a Fit', 'Withdrawn', 'Closed'] },
+    ];
+    const board = h('div', { class: 'board' }, cols.map((c) => {
+      const items = all.filter((j) => c.match.includes(grp(j.status))).sort((a, b) => (b.date_found || '').localeCompare(a.date_found || ''));
+      return h('section', { class: 'col', 'aria-label': c.name }, h('h3', {}, c.name, h('span', { class: 'num' }, fmt(items.length))),
+        items.length ? items.map((j) => h('button', { class: 'tile', type: 'button', style: { '--c': rc(j.region) }, onclick: () => jobDrawer(j, { tracked: true }) },
+          h('span', { class: 't' }, j.role), h('span', { class: 'm' }, j.company), h('span', { class: 'm' }, [j.status !== c.name ? j.status : null, day(j.date_found)].filter(Boolean).join(', '))))
+        : h('p', { class: 'muted', style: { fontSize: '.84rem', margin: '4px' } }, 'None'));
+    }));
+    return h('section', { class: 'panel' }, h('h2', {}, 'My applications'), h('p', { class: 'sub' }, 'Every job in your Gulf, India and Europe trackers, by stage. Swipe sideways to see every stage. Tap a job for its details.'), board);
   }
 
-  function viewCompanies(d) {
+  function viewCompanies() {
+    const d = state.data, f = state.f;
     const statuses = [...new Set(d.companies.map((c) => c.scan_status))];
-    const counts = statuses.map((s) => [s, d.companies.filter((c) => c.scan_status === s && inRegion(c)).length]).sort((a, b) => b[1] - a[1]);
-    const max = Math.max(1, ...counts.map(([, n]) => n));
-    const sortKey = state.sort.co || 'priority';
+    const roleCount = {}; d.portal_jobs.forEach((j) => { roleCount[j.company] = (roleCount[j.company] || 0) + 1; });
     const rows = d.companies.filter(inRegion)
-      .filter((c) => !state.q.coStatus || c.scan_status === state.q.coStatus)
-      .filter((c) => !state.q.coPri || c.priority === state.q.coPri)
-      .filter((c) => !state.q.coBancs || c.bancs === 'Yes')
-      .filter((c) => qMatch('coQ', c.company))
-      .sort((a, b) => String(a[sortKey] ?? '').localeCompare(String(b[sortKey] ?? ''), 'en', { numeric: true }) || a.company.localeCompare(b.company));
-    const th = (k, label, cls) => el('th', { class: cls, onclick: () => { state.sort.co = k; render(); } }, label + (sortKey === k ? ' ↓' : ''));
-    const scanned = d.companies.filter((c) => (c.scan_status === 'Scanned' || c.scan_status === 'Error') && inRegion(c)).sort((a, b) => (b.in_regions ?? 0) - (a.in_regions ?? 0));
-    return el('div', {},
-      el('div', { class: 'grid2' },
-        el('section', { class: 'card' }, el('h2', {}, 'Scan status'), el('p', { class: 'muted small' }, 'Where each target company stands.'), el('div', { class: 'bars' }, counts.map(([s, n]) => el('div', { class: 'bar' }, el('span', { class: 'muted' }, s), el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${(n / max) * 100}%;display:block;${s === 'Scanned' ? '' : 'opacity:.45'}` })), el('span', { class: 'n' }, fmt(n)))))),
-        el('section', { class: 'card' }, el('h2', {}, 'Scanned in the latest run'), el('div', { class: 'table-wrap' }, el('table', {}, el('thead', {}, el('tr', {}, el('th', {}, 'Company'), el('th', {}, 'Platform'), el('th', { class: 'num' }, 'Found'), el('th', { class: 'num' }, 'In regions'), el('th', { class: 'num' }, 'New'))), el('tbody', {}, scanned.map((c) => el('tr', {}, el('td', {}, c.company), el('td', {}, c.platform), el('td', { class: 'num' }, fmt(c.listings_found)), el('td', { class: 'num' }, fmt(c.in_regions)), el('td', { class: 'num' }, fmt(c.new))))))))),
-      el('section', { class: 'card' },
-        el('h2', {}, 'Company list'),
-        el('p', { class: 'muted small' }, 'All target companies from Target_Companies.md. Edit that file to add or remove one.'),
-        el('div', { class: 'controls' }, searchBox('coQ', 'Search company'), select('coStatus', 'Status', [['', 'All statuses'], ...statuses.map((s) => [s, s])]), select('coPri', 'Priority', [['', 'All priorities'], ['P1', 'P1'], ['P2', 'P2'], ['P3', 'P3']]), toggle('coBancs', 'BaNCS only'), el('span', { class: 'count' }, `${fmt(rows.length)} of ${fmt(d.companies.length)}`)),
-        el('div', { class: 'table-wrap' }, el('table', {},
-          el('thead', {}, el('tr', {}, th('company', 'Company'), th('priority', 'Priority'), th('regions', 'Search in'), th('bancs', 'BaNCS'), th('platform', 'Platform'), th('scan_status', 'Status'), el('th', {}, 'Careers'))),
-          el('tbody', {}, rows.map((c) => el('tr', {}, el('td', {}, c.company), el('td', {}, c.priority), el('td', {}, c.regions), el('td', { title: c.bancs_note || '' }, c.bancs), el('td', {}, c.platform), el('td', {}, el('span', { class: 'pill ' + (TONE[c.scan_status] || 'muted') }, c.scan_status)), el('td', {}, link(c.careers_url, 'Open')))))))));
+      .filter((c) => !f.coStatus || c.scan_status === f.coStatus).filter((c) => !f.coPri || c.priority === f.coPri)
+      .filter((c) => !f.coBancs || c.bancs === 'Yes').filter((c) => matchQ(c.company))
+      .sort(f.coSort === 'roles' ? (a, b) => (roleCount[b.company] || 0) - (roleCount[a.company] || 0) : f.coSort === 'name' ? (a, b) => a.company.localeCompare(b.company) : (a, b) => a.priority.localeCompare(b.priority) || (roleCount[b.company] || 0) - (roleCount[a.company] || 0) || a.company.localeCompare(b.company));
+    const sel = (key, label, opts) => { const s = h('select', { 'aria-label': label, onchange: (e) => { f[key] = e.target.value; render(); } }, opts.map(([v, t]) => h('option', { value: v }, t))); s.value = f[key] || ''; return s; };
+    const chip = (key, label) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(!!f[key]), onclick: () => { f[key] = !f[key]; render(); } }, label);
+    const scanned = d.companies.filter((c) => c.scan_status === 'Scanned').length;
+    return h('section', { class: 'panel' },
+      h('h2', {}, 'Your target companies'),
+      h('p', { class: 'sub' }, `${fmt(scanned)} of ${fmt(d.companies.length)} are scanned automatically. Tap a company for its details and roles. To add or remove one, edit Target_Companies.md.`),
+      h('div', { class: 'controls' }, sel('coStatus', 'Status', [['', 'All statuses'], ...statuses.map((s) => [s, s])]), sel('coPri', 'Priority', [['', 'All priorities'], ['P1', 'P1'], ['P2', 'P2'], ['P3', 'P3']]), sel('coSort', 'Sort', [['', 'Priority first'], ['roles', 'Most open roles'], ['name', 'Name A to Z']]), chip('coBancs', 'BaNCS only'), h('span', { class: 'count' }, `${fmt(rows.length)} companies`)),
+      h('div', { class: 'rows' },
+        h('div', { class: 'co-row head', 'aria-hidden': 'true' }, h('span', {}, 'Company'), h('span', {}, 'Priority'), h('span', {}, 'Regions'), h('span', {}, 'Status'), h('span', { style: { textAlign: 'right' } }, 'Roles')),
+        rows.map((c) => h('button', { class: 'co-row', type: 'button', onclick: () => companyDrawer(c) },
+          h('span', { class: 'nm' }, c.company, c.bancs === 'Yes' ? h('span', { class: 'tag', style: { marginLeft: '6px' } }, 'BaNCS') : null),
+          h('span', {}, c.priority),
+          h('span', { class: 'rg' }, c.regions.split(', ').filter(Boolean).map((r) => h('span', { class: 'dot', title: r, style: { background: rc(r) } }))),
+          h('span', {}, h('span', { class: 'pill ' + coTone(c.scan_status) }, c.scan_status)),
+          h('span', { class: 'roles num' }, roleCount[c.company] ? fmt(roleCount[c.company]) : '–')))));
   }
 
   const BATCH = 25;
@@ -327,37 +587,40 @@ footer { color: var(--muted); font-size: 0.8rem; margin: 24px 0 8px; display: fl
       '- One row per job. Link must be the direct link to that job posting.', '- Leave Job ID or Date Posted empty if the posting does not show it. Region is Gulf, India or Europe.', '- Only include jobs you actually saw. Do not guess or fill in details.', '',
       'After the CSV, list which companies you covered and which you could not check, with a one-line reason for each.'].join('\n');
   }
-  function viewChatGPT(d) {
-    const list = d.companies.filter((c) => c.scan_status !== 'Scanned').filter(inRegion).filter((c) => !state.q.p1 || c.priority === 'P1')
-      .sort((a, b) => a.priority.localeCompare(b.priority) || a.id.localeCompare(b.id, 'en', { numeric: true }));
-    const total = Math.max(1, Math.ceil(list.length / BATCH));
-    let b = Number(state.q.batch || 0); if (b >= total) b = 0;
+  function viewChatGPT() {
+    const d = state.data, f = state.f;
+    const list = d.companies.filter((c) => c.scan_status !== 'Scanned').filter(inRegion).filter((c) => !f.p1 || c.priority === 'P1').sort((a, b) => a.priority.localeCompare(b.priority) || a.id.localeCompare(b.id, 'en', { numeric: true }));
+    const total = Math.max(1, Math.ceil(list.length / BATCH)); let b = Number(f.batch || 0); if (b >= total) b = 0;
     const part = list.slice(b * BATCH, (b + 1) * BATCH);
-    const text = part.length ? promptFor(part, b + 1, total) : 'Nothing left for ChatGPT: the scanner covers every company in this view.';
-    const ta = el('textarea', { class: 'prompt', readonly: true, 'aria-label': 'ChatGPT prompt' }); ta.value = text;
-    const msg = el('span', { class: 'count', role: 'status' });
-    const copy = async () => { try { await navigator.clipboard.writeText(ta.value); msg.textContent = 'Copied. Paste it into ChatGPT.'; } catch (e) { ta.focus(); ta.select(); msg.textContent = 'Text selected: copy it with Ctrl+C (or long-press on mobile).'; } };
-    return el('section', { class: 'card' },
-      el('h2', {}, 'ChatGPT handoff'),
-      el('p', { class: 'muted small' }, `${fmt(list.length)} companies the scanner can't cover yet. Copy a batch into ChatGPT, then save its CSV in Career Portals\\ChatGPT Results on your laptop. The next sync checks every link before anything goes into your trackers.`),
-      el('div', { class: 'controls' },
-        (() => { const s = select('batch', 'Batch', Array.from({ length: total }, (_, i) => [String(i), `Batch ${i + 1} of ${total} (${list.slice(i * BATCH, (i + 1) * BATCH).length} companies)`])); s.value = String(b); return s; })(),
-        toggle('p1', 'P1 only'),
-        el('button', { class: 'btn', type: 'button', onclick: copy }, 'Copy ChatGPT prompt'), msg),
+    const ta = h('textarea', { class: 'prompt', readonly: true, 'aria-label': 'ChatGPT prompt' }); ta.value = part.length ? promptFor(part, b + 1, total) : 'Nothing left for ChatGPT: the scanner covers every company in this view.';
+    const batchSel = h('select', { 'aria-label': 'Batch', onchange: (e) => { f.batch = e.target.value; render(); } }, Array.from({ length: total }, (_, i) => h('option', { value: String(i) }, `Batch ${i + 1} of ${total}: ${list.slice(i * BATCH, (i + 1) * BATCH).length} companies`))); batchSel.value = String(b);
+    const copy = async () => { try { await navigator.clipboard.writeText(ta.value); toast('Prompt copied. Paste it into ChatGPT.'); } catch (e) { ta.focus(); ta.select(); toast('Text selected. Copy it with Ctrl+C, or long-press on a phone.'); } };
+    return h('section', { class: 'panel' },
+      h('h2', {}, 'ChatGPT handoff'),
+      h('p', { class: 'sub' }, `${fmt(list.length)} companies the scanner can't cover yet. Copy one batch into ChatGPT, then save its CSV in Career Portals\\ChatGPT Results on your laptop. The next sync checks every link before anything reaches your trackers.`),
+      h('div', { class: 'controls' }, batchSel, h('button', { class: 'chip', type: 'button', 'aria-pressed': String(!!f.p1), onclick: () => { f.p1 = !f.p1; f.batch = 0; render(); } }, 'P1 only'), h('button', { class: 'btn', type: 'button', onclick: copy }, 'Copy prompt')),
+      h('div', { class: 'rows', style: { marginBottom: '12px' } }, part.slice(0, 5).map((c) => h('button', { class: 'co-row', type: 'button', style: { gridTemplateColumns: 'minmax(0,1fr) auto' }, onclick: () => companyDrawer(c) }, h('span', { class: 'nm' }, c.company), h('span', { class: 'pill ' + coTone(c.scan_status) }, c.scan_status))),
+        part.length > 5 ? h('p', { class: 'muted', style: { fontSize: '.84rem', margin: '8px 6px 0' } }, `and ${fmt(part.length - 5)} more in this batch`) : null),
       ta);
   }
 
   function render() {
-    const d = state.data; if (!d) return;
-    document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === state.tab)));
-    document.querySelectorAll('#region button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.r === state.region)));
-    const m = d.scan_meta && d.scan_meta[0];
-    $('#scan-line').textContent = m ? `Latest scan ${when(m.started)} · ${fmt(d.portal_jobs.length)} open roles · ${fmt(m.new_this_run)} new · ${fmt(d.scored_jobs.length)} scored` : '';
-    $('#gen-line').textContent = 'Updated ' + when(d.generated);
-    const views = { new: viewNew, open: viewOpen, trackers: viewTrackers, companies: viewCompanies, chatgpt: viewChatGPT };
-    $('#view').replaceChildren(views[state.tab](d));
+    if (!state.data) return;
+    chrome();
+    const views = { today: viewToday, open: viewOpen, apps: viewApps, companies: viewCompanies, chatgpt: viewChatGPT };
+    const out = views[state.tab]();
+    $('#view').replaceChildren(...[].concat(out));
   }
 
+  // ---------- inputs ----------
+  let qt = null;
+  $('#q').addEventListener('input', (e) => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.limit = {}; if (state.tab === 'today' && state.q) state.tab = 'open'; render(); }, 160); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#drawer-root').firstChild) { closeDrawer(); return; }
+    if (e.key === '/' && state.data && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) { e.preventDefault(); $('#q').focus(); }
+  });
+  const hash = location.hash.slice(1); if (TABS.some((t) => t.id === hash)) state.tab = hash;
+  setInterval(() => { if (state.data && state.tab === 'today' && !$('#drawer-root').firstChild) document.querySelectorAll('.rcard-head span').forEach((s, i) => { s.textContent = `${REGIONS[i].city} ${clock(REGIONS[i].tz)}`; }); }, 30000);
   tryStored();
 })();
 </script>
