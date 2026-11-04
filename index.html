@@ -201,6 +201,37 @@ textarea.prompt { width: 100%; min-height: 260px; font: .82rem/1.5 ui-monospace,
 footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; color: var(--muted); font-size: .82rem; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 9px 14px; border-radius: 999px; font-size: .88rem; z-index: 60; box-shadow: var(--shadow); }
 
+
+/* ---------- Scan window ---------- */
+.modal { position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 24px)); max-height: min(86vh, 760px); background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
+.modal-scrim { position: fixed; inset: 0; background: rgba(10, 20, 18, .45); z-index: 50; }
+.modal header { padding: 18px 20px 10px; display: grid; gap: 4px; position: relative; }
+.modal h2 { font: 700 1.4rem/1.2 var(--cond); margin: 0; }
+.modal .close { position: absolute; top: 14px; right: 14px; border: 0; background: var(--sunk); border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; }
+.modal .body { padding: 6px 20px 14px; overflow: auto; display: grid; gap: 16px; }
+.modal footer { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 0; color: var(--ink); font-size: .9rem; }
+.step-label { font-weight: 600; margin-bottom: 8px; display: block; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice-row .chip { display: inline-flex; align-items: center; gap: 6px; }
+.co-pick { border: 1px solid var(--line); border-radius: var(--r-sm); max-height: 240px; overflow: auto; }
+.co-pick label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: .92rem; cursor: pointer; }
+.co-pick label:last-child { border-bottom: 0; }
+.co-pick label:hover { background: var(--sunk); }
+.co-pick .meta { font-size: .78rem; color: var(--muted); }
+.co-search { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--sunk); margin-bottom: 8px; }
+.progress { display: grid; gap: 10px; }
+.pstep { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; font-size: .95rem; }
+.pstep .mark { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: .75rem; }
+.pstep.done .mark { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+.pstep.now .mark { border-color: var(--primary); border-top-color: transparent; }
+.pstep.fail .mark { background: var(--bad); border-color: var(--bad); color: var(--surface); }
+.pstep .t2 { font-size: .8rem; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .pstep.now .mark { animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } } }
+.note { background: var(--sunk); border-radius: var(--r-sm); padding: 12px; font-size: .9rem; }
+.note ol { margin: 6px 0 0; padding-left: 20px; }
+.note code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; font-size: .85rem; }
+@media (max-width: 640px) { .modal { top: auto; bottom: 0; transform: translateX(-50%); width: 100%; border-radius: var(--r-lg) var(--r-lg) 0 0; max-height: 92vh; } .modal footer { padding-bottom: calc(14px + env(safe-area-inset-bottom)); } }
+
 /* ---------- Bottom nav (phones) ---------- */
 .bottom-nav { display: none; }
 @media (max-width: 860px) {
@@ -271,7 +302,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
         <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input type="search" id="q" placeholder="Search jobs and companies" aria-label="Search jobs and companies"></label>
         <span class="kbd" aria-hidden="true">/</span>
-        <a class="btn quiet" id="run-scan" href="https://github.com/aarish11/career-portal-scanner/actions/workflows/scan.yml" target="_blank" rel="noopener noreferrer" title="Opens GitHub. Click Run workflow there.">Run a scan</a>
+        <button class="btn" id="run-scan" type="button">Run a scan</button>
       </div>
     </header>
     <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -282,6 +313,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 </div>
 
 <div id="drawer-root"></div>
+<div id="modal-root"></div>
 
 <script>
 (() => {
@@ -623,10 +655,141 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     $('#view').replaceChildren(...[].concat(out));
   }
 
+
+  // ---------- scan window ----------
+  const scan = { region: null, mode: 'all', picked: new Set(), q: '', running: null };
+  const SCAN_KEY = 'jobdash-scan-v1';
+  const gh = async (path, opts = {}) => {
+    const r = await fetch('https://api.github.com/repos/' + state.data.scan_repo + path, { ...opts, headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + state.data.scan_token, 'X-GitHub-Api-Version': '2022-11-28', ...(opts.headers || {}) } });
+    if (!r.ok) { const e = new Error('github ' + r.status); e.status = r.status; throw e; }
+    return r.status === 204 ? null : r.json();
+  };
+  function closeModal() { $('#modal-root').replaceChildren(); }
+  function scannable() { return state.data.companies.filter((c) => c.scannable); }
+  function scanTargets() {
+    const reg = scan.region;
+    const pool = scannable().filter((c) => reg === 'All' || c.regions.split(', ').includes(reg));
+    return scan.mode === 'all' ? pool : pool.filter((c) => scan.picked.has(c.id));
+  }
+  function openScan() {
+    if (scan.region == null) scan.region = state.region;
+    let running = null; try { running = JSON.parse(localStorage.getItem(SCAN_KEY) || 'null'); } catch (e) { running = null; }
+    if (running && Date.now() - running.at < 45 * 60 * 1000 && !running.finished) { scan.running = running; return renderScan(); }
+    scan.running = null; renderScan();
+  }
+  function renderScan() {
+    const d = state.data, hasToken = !!d.scan_token;
+    const close = h('button', { class: 'close', type: 'button', 'aria-label': 'Close', onclick: closeModal }, svg('<path d="M6 6l12 12M18 6L6 18"/>', 16));
+    let body, foot;
+    if (scan.running) {
+      [body, foot] = progressView();
+    } else {
+      const pool = scannable().filter((c) => scan.region === 'All' || c.regions.split(', ').includes(scan.region));
+      const notSetUp = d.companies.filter((c) => !c.scannable && (scan.region === 'All' || c.regions.split(', ').includes(scan.region))).length;
+      const regChip = (r) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(scan.region === r), onclick: () => { scan.region = r; renderScan(); } }, r !== 'All' ? h('span', { class: 'dot', style: { background: rc(r) } }) : null, r === 'All' ? 'All regions' : r);
+      const modeChip = (m, label) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(scan.mode === m), onclick: () => { scan.mode = m; renderScan(); } }, label);
+      const list = pool.filter((c) => !scan.q || c.company.toLowerCase().includes(scan.q.toLowerCase()));
+      const search = h('input', { class: 'co-search', type: 'search', placeholder: 'Find a company', value: scan.q, 'aria-label': 'Find a company', oninput: (e) => { scan.q = e.target.value; const pos = e.target.selectionStart; renderScan(); const f = $('.co-search'); if (f) { f.focus(); f.setSelectionRange(pos, pos); } } });
+      const targets = scanTargets();
+      body = [
+        h('div', {}, h('span', { class: 'step-label' }, 'Region'), h('div', { class: 'choice-row' }, ['All', 'Gulf', 'India', 'Europe'].map(regChip))),
+        h('div', {}, h('span', { class: 'step-label' }, 'Companies'), h('div', { class: 'choice-row' }, modeChip('all', `All set-up portals (${fmt(pool.length)})`), modeChip('pick', 'Choose companies'))),
+        scan.mode === 'pick' ? h('div', {}, search, h('div', { class: 'co-pick' }, list.length ? list.map((c) => h('label', {},
+          h('input', { type: 'checkbox', checked: scan.picked.has(c.id), onchange: (e) => { e.target.checked ? scan.picked.add(c.id) : scan.picked.delete(c.id); renderScan(); } }),
+          h('span', {}, c.company, h('div', { class: 'meta' }, `${c.platform}, last found ${fmt(c.in_regions)} roles`)),
+          h('span', { class: 'rg', style: { display: 'flex', gap: '4px' } }, c.regions.split(', ').map((r) => h('span', { class: 'dot', title: r, style: { background: rc(r) } }))))) : h('p', { class: 'muted', style: { margin: '10px' } }, 'No set-up portal matches.'))) : null,
+        notSetUp ? h('p', { class: 'muted', style: { fontSize: '.86rem', margin: 0 } }, `${fmt(notSetUp)} more companies in this region aren't set up for automatic scanning yet. Use the ChatGPT handoff for those.`) : null,
+        hasToken ? null : h('div', { class: 'note' }, h('strong', {}, 'One-tap scanning isn\'t switched on yet.'), ' Start scan will open GitHub. There:',
+          h('ol', {}, h('li', {}, 'Click Run workflow.'), h('li', {}, 'Set Region to ', h('code', {}, scan.region), '.'), h('li', {}, 'In the company box, paste ', h('code', {}, scan.mode === 'all' ? '(leave it empty)' : targets.map((c) => c.id).join(',') || '(pick companies first)'), '.'), h('li', {}, 'Click the green Run workflow button.'))),
+      ];
+      const can = targets.length > 0;
+      foot = [h('span', { class: 'muted' }, can ? `${fmt(targets.length)} portal${targets.length === 1 ? '' : 's'}, ${scan.region === 'All' ? 'all regions' : scan.region + ' only'}. About ${Math.max(2, Math.round(targets.length * 0.4))}–${Math.max(4, Math.round(targets.length * 0.6) + 2)} minutes.` : 'Choose at least one company.'),
+        h('button', { class: 'btn', type: 'button', disabled: !can, onclick: start }, hasToken ? 'Start scan' : 'Open GitHub to start')];
+    }
+    $('#modal-root').replaceChildren(h('div', { class: 'modal-scrim', onclick: closeModal }),
+      h('section', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Run a scan' },
+        h('header', {}, h('h2', {}, 'Run a scan'), h('p', { class: 'muted', style: { margin: 0, fontSize: '.9rem' } }, 'Check your target companies\' career portals now. New jobs appear on the site when it finishes.'), close),
+        h('div', { class: 'body' }, body), h('footer', {}, foot)));
+  }
+  async function start() {
+    const targets = scanTargets();
+    const only = scan.mode === 'all' ? '' : targets.map((c) => c.id).join(',');
+    if (!state.data.scan_token) {
+      try { await navigator.clipboard.writeText(only); } catch (e) { /* nothing to copy or not allowed */ }
+      window.open('https://github.com/' + state.data.scan_repo + '/actions/workflows/scan.yml', '_blank', 'noopener');
+      toast(only ? 'Company list copied. Paste it on GitHub.' : 'Opened GitHub.');
+      return;
+    }
+    const at = Date.now();
+    try {
+      await gh('/actions/workflows/scan.yml/dispatches', { method: 'POST', body: JSON.stringify({ ref: 'main', inputs: { region: scan.region, only } }) });
+    } catch (e) {
+      toast(e.status === 401 || e.status === 403 || e.status === 404 ? 'GitHub refused the key. It may have expired: create a new one and update SITE_SCAN_TOKEN.' : 'Could not reach GitHub. Check your connection and try again.');
+      return;
+    }
+    scan.running = { at, region: scan.region, count: targets.length, scanRun: null, scanState: 'queued', publishRun: null, publishState: null, finished: false };
+    saveRun(); renderScan(); poll();
+  }
+  const saveRun = () => { try { localStorage.setItem(SCAN_KEY, JSON.stringify(scan.running)); } catch (e) { /* per-visit only */ } };
+  let pollT = null;
+  async function poll() {
+    clearTimeout(pollT);
+    const r = scan.running; if (!r || r.finished) return;
+    try {
+      if (!r.scanRun) {
+        const runs = await gh('/actions/workflows/scan.yml/runs?event=workflow_dispatch&per_page=5');
+        const mine = (runs.workflow_runs || []).find((x) => new Date(x.created_at).getTime() >= r.at - 15000);
+        if (mine) r.scanRun = mine.id;
+      }
+      if (r.scanRun && r.scanState !== 'success') {
+        const run = await gh('/actions/runs/' + r.scanRun);
+        r.scanState = run.status === 'completed' ? (run.conclusion === 'success' ? 'success' : 'failure') : run.status;
+        if (r.scanState === 'success') r.scanDone = new Date(run.updated_at).getTime();
+        if (r.scanState === 'failure') { r.finished = true; r.failed = 'scan'; r.url = run.html_url; }
+      }
+      if (r.scanState === 'success' && r.publishState !== 'success') {
+        const runs = await gh('/actions/workflows/publish-site.yml/runs?per_page=5');
+        const pub = (runs.workflow_runs || []).find((x) => new Date(x.created_at).getTime() >= r.scanDone - 60000);
+        if (pub) {
+          r.publishRun = pub.id;
+          r.publishState = pub.status === 'completed' ? (pub.conclusion === 'success' ? 'success' : 'failure') : pub.status;
+          if (r.publishState === 'success') { r.finished = true; r.doneAt = Date.now(); }
+          if (r.publishState === 'failure') { r.finished = true; r.failed = 'publish'; r.url = pub.html_url; }
+        }
+      }
+    } catch (e) { r.netError = true; }
+    saveRun();
+    if ($('#modal-root .modal')) renderScan();
+    if (!r.finished) pollT = setTimeout(poll, 10000);
+  }
+  function progressView() {
+    const r = scan.running;
+    const st = (name, sub, state) => h('div', { class: 'pstep ' + state }, h('span', { class: 'mark', 'aria-hidden': 'true' }, state === 'done' ? '✓' : state === 'fail' ? '!' : ''), h('span', {}, name, h('div', { class: 't2' }, sub)), null);
+    const s1 = 'done';
+    const s2 = r.failed === 'scan' ? 'fail' : r.scanState === 'success' ? 'done' : 'now';
+    const s3 = r.failed === 'publish' ? 'fail' : r.publishState === 'success' ? 'done' : r.scanState === 'success' ? 'now' : '';
+    const s4 = r.finished && !r.failed ? 'done' : '';
+    const body = [h('div', { class: 'progress' },
+      st('Scan requested', `${fmt(r.count)} portals, ${r.region === 'All' ? 'all regions' : r.region}`, s1),
+      st('Scanning career portals', r.scanState === 'queued' || !r.scanRun ? 'Waiting for GitHub to start' : r.scanState === 'success' ? 'Finished' : r.failed === 'scan' ? 'The scan failed' : 'Running, usually 2 to 6 minutes', s2),
+      st('Updating the site', s3 === 'now' ? 'Encrypting and publishing' : s3 === 'done' ? 'Published' : r.failed === 'publish' ? 'Publishing failed' : 'After the scan', s3),
+      st('Ready', r.finished && !r.failed ? 'Reload to see new jobs. GitHub Pages can take a minute to switch over.' : '', s4)),
+      r.netError && !r.finished ? h('p', { class: 'muted', style: { fontSize: '.86rem', margin: 0 } }, 'Lost touch with GitHub for a moment. Still checking.') : null,
+      r.failed ? h('p', { class: 'note' }, 'Something went wrong. ', r.url ? h('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer' }, 'Open the run on GitHub') : null, ' to see what happened, or ask Claude to look at it.') : null,
+      h('p', { class: 'muted', style: { fontSize: '.84rem', margin: 0 } }, 'You can close this window. The scan keeps running, and this window picks up where it left off when you open it again.')];
+    const foot = [
+      r.finished ? h('button', { class: 'btn quiet', type: 'button', onclick: () => { scan.running = null; try { localStorage.removeItem(SCAN_KEY); } catch (e) { /* ignore */ } renderScan(); } }, 'New scan') : h('span', { class: 'muted' }, 'Checking every 10 seconds'),
+      r.finished && !r.failed ? h('button', { class: 'btn', type: 'button', onclick: () => { try { localStorage.removeItem(SCAN_KEY); } catch (e) { /* ignore */ } location.reload(); } }, 'Reload the site') : h('button', { class: 'btn quiet', type: 'button', onclick: closeModal }, 'Close')];
+    if (!r.finished && !pollT) poll();
+    return [body, foot];
+  }
+  $('#run-scan').addEventListener('click', openScan);
+
   // ---------- inputs ----------
   let qt = null;
   $('#q').addEventListener('input', (e) => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.limit = {}; if (state.tab === 'today' && state.q) state.tab = 'open'; render(); }, 160); });
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#modal-root').firstChild) { closeModal(); return; }
     if (e.key === 'Escape' && $('#drawer-root').firstChild) { closeDrawer(); return; }
     if (e.key === '/' && state.data && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) { e.preventDefault(); $('#q').focus(); }
   });
