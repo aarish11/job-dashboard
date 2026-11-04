@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Job Dashboard</title>
+<style>
+:root {
+  --bg: #f7f6f3; --panel: #ffffff; --fg: #1f1e1b; --muted: #6b6860; --line: #e3e0d8;
+  --accent: #2f5d50; --accent-fg: #ffffff; --ok: #2e7d4f; --warn: #a15c00; --bad: #b3261e; --chip: #efede7;
+  --radius: 10px; --gap: 16px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #161614; --panel: #1f1f1c; --fg: #ecebe7; --muted: #a29f97; --line: #34332f; --accent: #7fb8a5; --accent-fg: #10201b; --ok: #6cc596; --warn: #e3a34f; --bad: #f08c84; --chip: #2a2a26; }
+}
+:root[data-theme="dark"] { --bg: #161614; --panel: #1f1f1c; --fg: #ecebe7; --muted: #a29f97; --line: #34332f; --accent: #7fb8a5; --accent-fg: #10201b; --ok: #6cc596; --warn: #e3a34f; --bad: #f08c84; --chip: #2a2a26; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-size: 15px; line-height: 1.45; }
+a { color: var(--accent); }
+button, input, select, textarea { font: inherit; color: inherit; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 1.5rem; margin: 0; font-weight: 600; }
+h2 { font-size: 1.1rem; margin: 0 0 4px; font-weight: 600; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+
+/* Sign-in */
+.login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.login-box { width: min(100%, 380px); background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.login-box input[type=password] { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.btn { padding: 9px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); cursor: pointer; font-weight: 600; }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); font-weight: 500; }
+.err { color: var(--bad); min-height: 1.2em; }
+.check { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 0.9rem; }
+
+/* App */
+header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; margin-bottom: 12px; }
+.tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); margin-bottom: 16px; scrollbar-width: none; }
+.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; cursor: pointer; color: var(--muted); white-space: nowrap; margin-bottom: -1px; }
+.tabs button[aria-selected=true] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+.seg button { background: transparent; border: 0; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed=true] { background: var(--panel); color: var(--fg); font-weight: 600; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile, .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; min-width: 0; }
+.tile b { display: block; font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.card { margin-bottom: 16px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+.controls input[type=search], .controls select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-width: 0; }
+.controls input[type=search] { flex: 1 1 200px; max-width: 320px; }
+.count { color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.job { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; }
+.job .title { font-weight: 600; }
+.job .meta { color: var(--muted); font-size: 0.88rem; }
+.job .side { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.job .why { grid-column: 1 / -1; font-size: 0.88rem; }
+.score { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; font-size: 0.78rem; white-space: nowrap; }
+.pill.ok { color: var(--ok); } .pill.warn { color: var(--warn); } .pill.bad { color: var(--bad); } .pill.muted { color: var(--muted); }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--chip); font-size: 0.78rem; }
+.table-wrap { overflow: auto; max-height: 70vh; border: 1px solid var(--line); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { position: sticky; top: 0; background: var(--panel); color: var(--muted); font-weight: 600; white-space: nowrap; cursor: pointer; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.bars { display: flex; flex-direction: column; gap: 6px; }
+.bar { display: grid; grid-template-columns: minmax(90px, 11rem) 1fr 3rem; gap: 8px; align-items: center; font-size: 0.88rem; }
+.bar .track { height: 10px; background: var(--chip); border-radius: 999px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--accent); border-radius: 999px; }
+.bar .n { text-align: right; font-variant-numeric: tabular-nums; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+textarea.prompt { width: 100%; min-height: 240px; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.more { margin-top: 10px; }
+.empty { padding: 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); }
+footer { color: var(--muted); font-size: 0.8rem; margin: 24px 0 8px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
+@media (max-width: 600px) {
+  .wrap { padding: 12px; }
+  .job { grid-template-columns: 1fr; }
+  .job .side { flex-direction: row; justify-content: flex-start; align-items: center; text-align: left; flex-wrap: wrap; }
+  .tile b { font-size: 1.3rem; }
+}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <div class="login-box">
+    <h1>Job Dashboard</h1>
+    <p class="muted small">Private. Enter your password to unlock.</p>
+    <input type="password" id="pw" autocomplete="current-password" placeholder="Password" aria-label="Password">
+    <label class="check"><input type="checkbox" id="remember"> Keep me signed in on this device</label>
+    <button class="btn" id="unlock" type="button">Unlock</button>
+    <p class="err small" id="err" role="alert"></p>
+  </div>
+</div>
+
+<div id="app" class="wrap" hidden>
+  <header class="top">
+    <div>
+      <h1>Job Dashboard</h1>
+      <p class="muted small" id="scan-line"></p>
+    </div>
+    <div class="seg" id="region" role="group" aria-label="Region">
+      <button type="button" data-r="All" aria-pressed="true">All</button>
+      <button type="button" data-r="Gulf" aria-pressed="false">Gulf</button>
+      <button type="button" data-r="India" aria-pressed="false">India</button>
+      <button type="button" data-r="Europe" aria-pressed="false">Europe</button>
+    </div>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="new" aria-selected="true">New jobs</button>
+    <button type="button" role="tab" data-tab="open" aria-selected="false">Open roles</button>
+    <button type="button" role="tab" data-tab="trackers" aria-selected="false">My trackers</button>
+    <button type="button" role="tab" data-tab="companies" aria-selected="false">Companies</button>
+    <button type="button" role="tab" data-tab="chatgpt" aria-selected="false">ChatGPT handoff</button>
+  </nav>
+  <main id="view"></main>
+  <footer>
+    <span id="gen-line"></span>
+    <span><button class="btn ghost" id="lock" type="button">Lock</button></span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const STORE_KEY = 'jobdash-key-v1';
+  const state = { tab: 'new', region: 'All', data: null, q: {}, sort: {}, limit: {} };
+  const $ = (s, el = document) => el.querySelector(s);
+  const el = (tag, attrs = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v === true ? '' : v);
+    }
+    kids.flat().forEach((c) => c != null && n.append(c.nodeType ? c : document.createTextNode(String(c))));
+    return n;
+  };
+  const fmt = (n) => (n == null || n === '' ? '' : Number(n).toLocaleString('en-IN'));
+  const day = (iso) => { if (!iso) return ''; const d = new Date(iso.length <= 10 ? iso + 'T00:00:00Z' : iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+  const when = (iso) => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString('en-GB', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' IST'; };
+  const safeUrl = (u) => (u && /^https?:\/\//i.test(u) ? u : null);
+  const link = (u, label = 'Open posting') => (safeUrl(u) ? el('a', { href: u, target: '_blank', rel: 'noopener noreferrer' }, label) : null);
+  const inRegion = (r) => state.region === 'All' || r.region === state.region || (r.regions || '').includes(state.region);
+  const TONE = { 'Scanned': 'ok', 'Error': 'bad', 'Blocked (needs browser)': 'warn', 'Broken link': 'warn', 'Unreachable': 'warn' };
+  const STATUS_TONE = (s) => (/^(Applied|Screening|Interview|Offer|Shortlisted)/.test(s) ? 'ok' : /^(Rejected|Not a Fit|Withdrawn|Closed)/.test(s) ? 'muted' : 'warn');
+
+  // ---------- Decryption ----------
+  const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  async function deriveKey(password, payload) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(payload.salt), iterations: payload.iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
+  }
+  async function decrypt(key, payload) {
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(payload.iv) }, key, b64(payload.ct));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  let payloadPromise = null;
+  const getPayload = () => (payloadPromise ||= fetch('data.enc.json', { cache: 'no-store' }).then((r) => { if (!r.ok) throw new Error('data'); return r.json(); }));
+
+  async function unlockWith(key, payload) {
+    state.data = await decrypt(key, payload);
+    $('#login').hidden = true; $('#app').hidden = false;
+    render();
+  }
+  async function tryStored() {
+    let raw = null;
+    try { raw = localStorage.getItem(STORE_KEY); } catch (e) { raw = null; }
+    if (!raw) return;
+    try {
+      const payload = await getPayload();
+      const stored = JSON.parse(raw);
+      if (stored.salt !== payload.salt) throw new Error('stale');
+      const key = await crypto.subtle.importKey('raw', b64(stored.k), { name: 'AES-GCM' }, true, ['decrypt']);
+      await unlockWith(key, payload);
+    } catch (e) { try { localStorage.removeItem(STORE_KEY); } catch (e2) { /* ignore */ } }
+  }
+  async function unlock() {
+    const pw = $('#pw').value; $('#err').textContent = '';
+    if (!pw) { $('#err').textContent = 'Enter your password.'; return; }
+    $('#unlock').disabled = true; $('#unlock').textContent = 'Unlocking…';
+    try {
+      const payload = await getPayload();
+      const key = await deriveKey(pw, payload);
+      await unlockWith(key, payload);
+      if ($('#remember').checked) {
+        const k = new Uint8Array(await crypto.subtle.exportKey('raw', key));
+        try { localStorage.setItem(STORE_KEY, JSON.stringify({ salt: payload.salt, k: btoa(String.fromCharCode(...k)) })); } catch (e) { /* storage off: stay signed in for this visit only */ }
+      }
+      $('#pw').value = '';
+    } catch (e) {
+      $('#err').textContent = e.message === 'data' ? 'Could not load the data. Check your connection and reload.' : 'Wrong password.';
+    } finally { $('#unlock').disabled = false; $('#unlock').textContent = 'Unlock'; }
+  }
+  $('#unlock').addEventListener('click', unlock);
+  $('#pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
+  $('#lock').addEventListener('click', () => { try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ } state.data = null; $('#app').hidden = true; $('#login').hidden = false; $('#view').replaceChildren(); });
+
+  // ---------- Navigation ----------
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => { state.tab = b.dataset.tab; history.replaceState(null, '', '#' + state.tab); render(); }));
+  document.querySelectorAll('#region button').forEach((b) => b.addEventListener('click', () => { state.region = b.dataset.r; render(); }));
+  const fromHash = location.hash.slice(1);
+  if (['new', 'open', 'trackers', 'companies', 'chatgpt'].includes(fromHash)) state.tab = fromHash;
+
+  // ---------- Views ----------
+  const searchBox = (key, placeholder) => el('input', { type: 'search', placeholder, value: state.q[key] || '', 'aria-label': placeholder, oninput: (e) => { state.q[key] = e.target.value; state.limit[key] = 0; renderSoon(); } });
+  const select = (key, label, options) => {
+    const s = el('select', { 'aria-label': label, onchange: (e) => { state.q[key] = e.target.value; state.limit[key] = 0; render(); } });
+    options.forEach(([v, t]) => s.append(el('option', { value: v }, t)));
+    s.value = state.q[key] || '';
+    return s;
+  };
+  const toggle = (key, label) => el('label', { class: 'check' }, el('input', { type: 'checkbox', checked: !!state.q[key], onchange: (e) => { state.q[key] = e.target.checked; state.limit[key] = 0; render(); } }), label);
+  let t = null; const renderSoon = () => { clearTimeout(t); t = setTimeout(() => { const f = document.activeElement; const pos = f && f.selectionStart; render(); if (f && f.type === 'search') { const again = [...document.querySelectorAll('input[type=search]')].find((x) => x.getAttribute('aria-label') === f.getAttribute('aria-label')); if (again) { again.focus(); again.setSelectionRange(pos, pos); } } }, 150); };
+  const showMore = (key, total, shown) => (shown < total ? el('div', { class: 'more' }, el('button', { class: 'btn ghost', type: 'button', onclick: () => { state.limit[key] = shown + 100; render(); } }, `Show more (${fmt(total - shown)} left)`)) : null);
+  const qMatch = (key, ...fields) => { const q = (state.q[key] || '').trim().toLowerCase(); return !q || fields.join(' ').toLowerCase().includes(q); };
+
+  function viewNew(d) {
+    const rows = d.scored_jobs.filter(inRegion)
+      .filter((r) => (Number(r.score) || 0) >= Number(state.q.minScore || 0))
+      .filter((r) => !state.q.newBancs || r.bancs === 'Yes')
+      .filter((r) => qMatch('newQ', r.role, r.company, r.location))
+      .sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
+    const limit = state.limit.newQ || 100;
+    return el('section', { class: 'card' },
+      el('h2', {}, 'New jobs, scored'),
+      el('p', { class: 'muted small' }, 'Posted since the scan before, scored out of 10 against your resume and region rules. 7+ also goes to your ATS pipeline inbox.'),
+      el('div', { class: 'controls' }, searchBox('newQ', 'Search role, company or city'), select('minScore', 'Minimum score', [['', 'Any score'], ['5', '5+'], ['7', '7+'], ['8', '8+']]), toggle('newBancs', 'BaNCS companies only'), el('span', { class: 'count' }, d.scored_jobs.length ? `${fmt(rows.length)} shown` : '')),
+      d.scored_jobs.length === 0
+        ? el('p', { class: 'empty' }, 'No new jobs scored yet. The first scan only recorded jobs that were already open, so new postings appear here from the next scans.')
+        : el('div', { class: 'list' }, rows.slice(0, limit).map((r) => el('article', { class: 'job' },
+            el('div', {}, el('div', { class: 'title' }, r.role), el('div', { class: 'meta' }, [r.company, r.location].filter(Boolean).join(' · '))),
+            el('div', { class: 'side' }, el('span', { class: 'score' }, r.score ?? '–'), r.eligibility ? el('span', { class: 'pill ' + (r.eligibility === 'Pass' ? 'ok' : r.eligibility === 'Fail' ? 'bad' : 'muted') }, r.eligibility) : null, link(r.link)),
+            r.why ? el('div', { class: 'why' }, r.why) : null))),
+      showMore('newQ', rows.length, Math.min(rows.length, limit)));
+  }
+
+  function viewOpen(d) {
+    const companies = [...new Set(d.portal_jobs.map((r) => r.company))].sort();
+    const rows = d.portal_jobs.filter(inRegion)
+      .filter((r) => !state.q.openCo || r.company === state.q.openCo)
+      .filter((r) => !state.q.openBancs || r.bancs === 'Yes')
+      .filter((r) => qMatch('openQ', r.role, r.company, r.location))
+      .sort((a, b) => (b.first_seen || '').localeCompare(a.first_seen || '') || a.company.localeCompare(b.company));
+    const limit = state.limit.openQ || 100;
+    return el('section', { class: 'card' },
+      el('h2', {}, 'Open roles at your target companies'),
+      el('p', { class: 'muted small' }, 'Every role the latest scan found in your regions that matched your search terms. Not scored, so many will not fit: use it to browse. "Several locations" means the portal did not name one city.'),
+      el('div', { class: 'controls' }, searchBox('openQ', 'Search role, company or city'), select('openCo', 'Company', [['', 'All companies'], ...companies.map((c) => [c, c])]), toggle('openBancs', 'BaNCS companies only'), el('span', { class: 'count' }, `${fmt(rows.length)} of ${fmt(d.portal_jobs.length)}`)),
+      rows.length === 0 ? el('p', { class: 'empty' }, 'No roles match.') :
+      el('div', { class: 'list' }, rows.slice(0, limit).map((r) => el('article', { class: 'job' },
+        el('div', {}, el('div', { class: 'title' }, r.role), el('div', { class: 'meta' }, [r.company, r.location].filter(Boolean).join(' · '))),
+        el('div', { class: 'side' }, el('span', { class: 'chip' }, r.region), r.bancs === 'Yes' ? el('span', { class: 'chip' }, 'BaNCS') : null, el('span', { class: 'meta' }, 'Seen ' + day(r.first_seen)), link(r.link))))),
+      showMore('openQ', rows.length, Math.min(rows.length, limit)));
+  }
+
+  function viewTrackers(d) {
+    const jobs = (d.trackers || []).filter(inRegion);
+    if (!d.trackers || d.trackers.length === 0) return el('p', { class: 'empty' }, 'No tracker data yet.');
+    const grp = (s) => (String(s).startsWith('Rejected') ? 'Rejected' : s);
+    const count = (list) => jobs.filter((j) => list.includes(grp(j.status))).length;
+    const statuses = ['New', 'Needs JD', 'Shortlisted', 'Applied', 'Screening', 'Interview', 'Offer', 'Not a Fit', 'Rejected', 'Withdrawn', 'Closed'];
+    const sc = statuses.map((s) => [s, jobs.filter((j) => grp(j.status) === s).length]).filter(([, n]) => n > 0);
+    const max = Math.max(1, ...sc.map(([, n]) => n));
+    const rows = jobs.filter((r) => qMatch('trkQ', r.role, r.company, r.location, r.status, r.source))
+      .filter((r) => !state.q.trkStatus || grp(r.status) === state.q.trkStatus)
+      .sort((a, b) => (b.date_found || '').localeCompare(a.date_found || ''));
+    return el('div', {},
+      el('div', { class: 'tiles' },
+        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Jobs tracked'), el('b', {}, fmt(jobs.length))),
+        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'To review'), el('b', {}, fmt(count(['New', 'Needs JD'])))),
+        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Shortlisted'), el('b', {}, fmt(count(['Shortlisted'])))),
+        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Applied'), el('b', {}, fmt(count(['Applied'])))),
+        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Interviews'), el('b', {}, fmt(count(['Screening', 'Interview'])))),
+        el('div', { class: 'tile' }, el('span', { class: 'muted small' }, 'Rejected'), el('b', {}, fmt(count(['Rejected']))))),
+      el('div', { class: 'grid2' },
+        el('section', { class: 'card' }, el('h2', {}, 'By status'), el('div', { class: 'bars' }, sc.map(([s, n]) => el('div', { class: 'bar' }, el('span', { class: 'muted' }, s), el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${(n / max) * 100}%;display:block` })), el('span', { class: 'n' }, fmt(n)))))),
+        el('section', { class: 'card' }, el('h2', {}, 'By region'), el('div', { class: 'bars' }, ['Gulf', 'India', 'Europe'].map((r) => { const n = (d.trackers || []).filter((j) => j.region === r).length; const m = Math.max(1, ...['Gulf', 'India', 'Europe'].map((x) => (d.trackers || []).filter((j) => j.region === x).length)); return el('div', { class: 'bar' }, el('span', { class: 'muted' }, r), el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${(n / m) * 100}%;display:block` })), el('span', { class: 'n' }, fmt(n))); })))),
+      el('section', { class: 'card' },
+        el('h2', {}, 'All tracked jobs'),
+        el('div', { class: 'controls' }, searchBox('trkQ', 'Search role, company, city or status'), select('trkStatus', 'Status', [['', 'All statuses'], ...sc.map(([s]) => [s, s])]), el('span', { class: 'count' }, `${fmt(rows.length)} shown`)),
+        el('div', { class: 'list' }, rows.map((r) => el('article', { class: 'job' },
+          el('div', {}, el('div', { class: 'title' }, r.role), el('div', { class: 'meta' }, [r.company, r.location, r.source].filter(Boolean).join(' · ')), r.next_action ? el('div', { class: 'meta' }, `Next: ${r.next_action}${r.next_action_due ? ' (by ' + day(r.next_action_due) + ')' : ''}`) : null),
+          el('div', { class: 'side' }, el('span', { class: 'pill ' + STATUS_TONE(r.status) }, r.status), r.score != null ? el('span', { class: 'meta' }, 'Score ' + r.score) : null, el('span', { class: 'meta' }, day(r.date_found)), link(r.link)))))));
+  }
+
+  function viewCompanies(d) {
+    const statuses = [...new Set(d.companies.map((c) => c.scan_status))];
+    const counts = statuses.map((s) => [s, d.companies.filter((c) => c.scan_status === s && inRegion(c)).length]).sort((a, b) => b[1] - a[1]);
+    const max = Math.max(1, ...counts.map(([, n]) => n));
+    const sortKey = state.sort.co || 'priority';
+    const rows = d.companies.filter(inRegion)
+      .filter((c) => !state.q.coStatus || c.scan_status === state.q.coStatus)
+      .filter((c) => !state.q.coPri || c.priority === state.q.coPri)
+      .filter((c) => !state.q.coBancs || c.bancs === 'Yes')
+      .filter((c) => qMatch('coQ', c.company))
+      .sort((a, b) => String(a[sortKey] ?? '').localeCompare(String(b[sortKey] ?? ''), 'en', { numeric: true }) || a.company.localeCompare(b.company));
+    const th = (k, label, cls) => el('th', { class: cls, onclick: () => { state.sort.co = k; render(); } }, label + (sortKey === k ? ' ↓' : ''));
+    const scanned = d.companies.filter((c) => (c.scan_status === 'Scanned' || c.scan_status === 'Error') && inRegion(c)).sort((a, b) => (b.in_regions ?? 0) - (a.in_regions ?? 0));
+    return el('div', {},
+      el('div', { class: 'grid2' },
+        el('section', { class: 'card' }, el('h2', {}, 'Scan status'), el('p', { class: 'muted small' }, 'Where each target company stands.'), el('div', { class: 'bars' }, counts.map(([s, n]) => el('div', { class: 'bar' }, el('span', { class: 'muted' }, s), el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${(n / max) * 100}%;display:block;${s === 'Scanned' ? '' : 'opacity:.45'}` })), el('span', { class: 'n' }, fmt(n)))))),
+        el('section', { class: 'card' }, el('h2', {}, 'Scanned in the latest run'), el('div', { class: 'table-wrap' }, el('table', {}, el('thead', {}, el('tr', {}, el('th', {}, 'Company'), el('th', {}, 'Platform'), el('th', { class: 'num' }, 'Found'), el('th', { class: 'num' }, 'In regions'), el('th', { class: 'num' }, 'New'))), el('tbody', {}, scanned.map((c) => el('tr', {}, el('td', {}, c.company), el('td', {}, c.platform), el('td', { class: 'num' }, fmt(c.listings_found)), el('td', { class: 'num' }, fmt(c.in_regions)), el('td', { class: 'num' }, fmt(c.new))))))))),
+      el('section', { class: 'card' },
+        el('h2', {}, 'Company list'),
+        el('p', { class: 'muted small' }, 'All target companies from Target_Companies.md. Edit that file to add or remove one.'),
+        el('div', { class: 'controls' }, searchBox('coQ', 'Search company'), select('coStatus', 'Status', [['', 'All statuses'], ...statuses.map((s) => [s, s])]), select('coPri', 'Priority', [['', 'All priorities'], ['P1', 'P1'], ['P2', 'P2'], ['P3', 'P3']]), toggle('coBancs', 'BaNCS only'), el('span', { class: 'count' }, `${fmt(rows.length)} of ${fmt(d.companies.length)}`)),
+        el('div', { class: 'table-wrap' }, el('table', {},
+          el('thead', {}, el('tr', {}, th('company', 'Company'), th('priority', 'Priority'), th('regions', 'Search in'), th('bancs', 'BaNCS'), th('platform', 'Platform'), th('scan_status', 'Status'), el('th', {}, 'Careers'))),
+          el('tbody', {}, rows.map((c) => el('tr', {}, el('td', {}, c.company), el('td', {}, c.priority), el('td', {}, c.regions), el('td', { title: c.bancs_note || '' }, c.bancs), el('td', {}, c.platform), el('td', {}, el('span', { class: 'pill ' + (TONE[c.scan_status] || 'muted') }, c.scan_status)), el('td', {}, link(c.careers_url, 'Open')))))))));
+  }
+
+  const BATCH = 25;
+  function promptFor(list, n, total) {
+    const lines = list.map((c, i) => `${i + 1}. ${c.company}\n   Search in: ${c.regions}\n   Careers page: ${c.careers_url || 'none known: search the web and LinkedIn for its current openings'}\n   Search terms: ${c.search_terms || 'Business Analyst'}`);
+    return ['I am a banking business analyst (TCS BaNCS, securities processing, requirements, UAT) looking for new jobs. Please check these employers for current openings. Do not apply, log in, create accounts or submit anything.', '',
+      'For each company below, open its careers page (or, if it has none, search the web and LinkedIn for its current openings) and find jobs posted in the last 7 days that match any of these roles: Business Analyst, Functional Analyst, Systems Analyst, Techno-Functional Consultant, Functional Consultant, Business Consultant, Product Owner, Data Analyst, or any TCS BaNCS role. Also use the company\'s own search terms listed below.', '',
+      'Only include jobs located in the regions listed for that company:', '- Gulf = UAE, Saudi Arabia, Qatar, Oman, Bahrain, Kuwait', '- India = India', '- Europe = any European country, including the UK', '',
+      `Companies (batch ${n} of ${total}):`, ...lines, '',
+      'Give me the result as a CSV file named chatgpt_results_YYYYMMDD_HHMM.csv (use today\'s date and time), with exactly these columns:', 'Company,Role Title,Location,Link,Job ID,Date Posted,Region,Portal Searched',
+      '- One row per job. Link must be the direct link to that job posting.', '- Leave Job ID or Date Posted empty if the posting does not show it. Region is Gulf, India or Europe.', '- Only include jobs you actually saw. Do not guess or fill in details.', '',
+      'After the CSV, list which companies you covered and which you could not check, with a one-line reason for each.'].join('\n');
+  }
+  function viewChatGPT(d) {
+    const list = d.companies.filter((c) => c.scan_status !== 'Scanned').filter(inRegion).filter((c) => !state.q.p1 || c.priority === 'P1')
+      .sort((a, b) => a.priority.localeCompare(b.priority) || a.id.localeCompare(b.id, 'en', { numeric: true }));
+    const total = Math.max(1, Math.ceil(list.length / BATCH));
+    let b = Number(state.q.batch || 0); if (b >= total) b = 0;
+    const part = list.slice(b * BATCH, (b + 1) * BATCH);
+    const text = part.length ? promptFor(part, b + 1, total) : 'Nothing left for ChatGPT: the scanner covers every company in this view.';
+    const ta = el('textarea', { class: 'prompt', readonly: true, 'aria-label': 'ChatGPT prompt' }); ta.value = text;
+    const msg = el('span', { class: 'count', role: 'status' });
+    const copy = async () => { try { await navigator.clipboard.writeText(ta.value); msg.textContent = 'Copied. Paste it into ChatGPT.'; } catch (e) { ta.focus(); ta.select(); msg.textContent = 'Text selected: copy it with Ctrl+C (or long-press on mobile).'; } };
+    return el('section', { class: 'card' },
+      el('h2', {}, 'ChatGPT handoff'),
+      el('p', { class: 'muted small' }, `${fmt(list.length)} companies the scanner can't cover yet. Copy a batch into ChatGPT, then save its CSV in Career Portals\\ChatGPT Results on your laptop. The next sync checks every link before anything goes into your trackers.`),
+      el('div', { class: 'controls' },
+        (() => { const s = select('batch', 'Batch', Array.from({ length: total }, (_, i) => [String(i), `Batch ${i + 1} of ${total} (${list.slice(i * BATCH, (i + 1) * BATCH).length} companies)`])); s.value = String(b); return s; })(),
+        toggle('p1', 'P1 only'),
+        el('button', { class: 'btn', type: 'button', onclick: copy }, 'Copy ChatGPT prompt'), msg),
+      ta);
+  }
+
+  function render() {
+    const d = state.data; if (!d) return;
+    document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === state.tab)));
+    document.querySelectorAll('#region button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.r === state.region)));
+    const m = d.scan_meta && d.scan_meta[0];
+    $('#scan-line').textContent = m ? `Latest scan ${when(m.started)} · ${fmt(d.portal_jobs.length)} open roles · ${fmt(m.new_this_run)} new · ${fmt(d.scored_jobs.length)} scored` : '';
+    $('#gen-line').textContent = 'Updated ' + when(d.generated);
+    const views = { new: viewNew, open: viewOpen, trackers: viewTrackers, companies: viewCompanies, chatgpt: viewChatGPT };
+    $('#view').replaceChildren(views[state.tab](d));
+  }
+
+  tryStored();
+})();
+</script>
+</body>
+</html>
