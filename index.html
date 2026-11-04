@@ -13,7 +13,7 @@
 :root {
   --paper: #EEF2F1; --surface: #FFFFFF; --sunk: #F5F8F7; --ink: #16302B; --muted: #5E716C; --line: #D3DCD9;
   --primary: #0F5C4F; --primary-ink: #FFFFFF; --primary-soft: #DCEBE7;
-  --gulf: #B8791E; --india: #4B4FB0; --europe: #1E7C99; --multi: #8A9A96;
+  --gulf: #B8791E; --india: #4B4FB0; --europe: #1E7C99; --apac: #9C3F6E; --canada: #5E7F2C; --multi: #8A9A96;
   --ok: #2F7A4A; --warn: #A5620F; --bad: #B4372D;
   --r-sm: 6px; --r-md: 12px; --r-lg: 18px;
   --shadow: 0 1px 2px rgba(22, 48, 43, .06), 0 8px 24px rgba(22, 48, 43, .08);
@@ -25,7 +25,7 @@
   :root:not([data-theme="light"]) {
     --paper: #0F1A18; --surface: #172522; --sunk: #13201D; --ink: #E4EDEA; --muted: #8FA39E; --line: #2A3C38;
     --primary: #5FC2AA; --primary-ink: #0B1F1A; --primary-soft: #1D3A33;
-    --gulf: #E0A85A; --india: #9A9DF2; --europe: #62BCD6; --multi: #6F827E;
+    --gulf: #E0A85A; --india: #9A9DF2; --europe: #62BCD6; --apac: #E58BB6; --canada: #A6C76A; --multi: #6F827E;
     --ok: #74C894; --warn: #E4A653; --bad: #F08A80;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .35);
     color-scheme: dark;
@@ -34,7 +34,7 @@
 :root[data-theme="dark"] {
   --paper: #0F1A18; --surface: #172522; --sunk: #13201D; --ink: #E4EDEA; --muted: #8FA39E; --line: #2A3C38;
   --primary: #5FC2AA; --primary-ink: #0B1F1A; --primary-soft: #1D3A33;
-  --gulf: #E0A85A; --india: #9A9DF2; --europe: #62BCD6; --multi: #6F827E;
+  --gulf: #E0A85A; --india: #9A9DF2; --europe: #62BCD6; --apac: #E58BB6; --canada: #A6C76A; --multi: #6F827E;
   --ok: #74C894; --warn: #E4A653; --bad: #F08A80;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .35);
   color-scheme: dark;
@@ -110,7 +110,7 @@ button { cursor: pointer; }
 }
 
 /* ---------- Region cards ---------- */
-.region-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 18px 0; }
+.region-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
 .rcard { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-md); padding: 14px 16px; text-align: left; display: grid; gap: 10px; border-top: 4px solid var(--c); }
 .rcard[aria-pressed=true] { outline: 2px solid var(--c); outline-offset: -1px; }
 .rcard-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
@@ -251,8 +251,8 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   .kbd { display: none; }
   #run-scan { order: 3; }
   .tabs { display: none; }
-  .regions { width: 100%; justify-content: space-between; }
-  .regions button { flex: 1; justify-content: center; padding: 7px 6px; }
+  .regions { width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .regions button { flex: 1 0 auto; justify-content: center; padding: 7px 10px; }
   .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 14px; }
   .stage { padding: 12px; }
   .stage::after { display: none; }
@@ -282,9 +282,9 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 
 <div id="login" class="login">
   <form class="login-box" id="login-form" onsubmit="return false">
-    <div class="login-mark" aria-hidden="true"><span style="background:var(--gulf)"></span><span style="background:var(--india)"></span><span style="background:var(--europe)"></span></div>
+    <div class="login-mark" aria-hidden="true"><span style="background:var(--gulf)"></span><span style="background:var(--india)"></span><span style="background:var(--europe)"></span><span style="background:var(--apac)"></span><span style="background:var(--canada)"></span></div>
     <h1>Job Dashboard</h1>
-    <p class="muted">Your job search across the Gulf, India and Europe. Sign in to unlock it.</p>
+    <p class="muted">Your job search across the Gulf, India, Europe, Asia-Pacific and Canada. Sign in to unlock it.</p>
     <label class="field">Username<input type="text" id="user" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
     <label class="field">Password<input type="password" id="pw" autocomplete="current-password"></label>
     <label class="check"><input type="checkbox" id="remember"> Keep me signed in on this device</label>
@@ -322,8 +322,10 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     { id: 'Gulf', tz: 'Asia/Dubai', city: 'Dubai', color: 'var(--gulf)' },
     { id: 'India', tz: 'Asia/Kolkata', city: 'Delhi', color: 'var(--india)' },
     { id: 'Europe', tz: 'Europe/Luxembourg', city: 'Luxembourg', color: 'var(--europe)' },
+    { id: 'APAC', tz: 'Asia/Singapore', city: 'Singapore', color: 'var(--apac)' },
+    { id: 'Canada', tz: 'America/Toronto', city: 'Toronto', color: 'var(--canada)' },
   ];
-  const RCOLOR = { Gulf: 'var(--gulf)', India: 'var(--india)', Europe: 'var(--europe)' };
+  const RCOLOR = { Gulf: 'var(--gulf)', India: 'var(--india)', Europe: 'var(--europe)', APAC: 'var(--apac)', Canada: 'var(--canada)' };
   const rc = (r) => RCOLOR[r] || 'var(--multi)';
   const TABS = [
     { id: 'today', label: 'Today', icon: '<path d="M3 12h4l3 8 4-16 3 8h4"/>' },
@@ -539,13 +541,13 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
         waiting.slice(0, 30).map((j) => jobRow(j, { when: (x) => (x.posted ? 'Posted ' + day(x.posted) : 'Not scored yet') })))
         : h('p', { class: 'empty' }, 'Nothing new yet. Jobs posted after the last scan will appear here.'),
       waiting.length && !scored.length ? h('p', { class: 'sub', style: { marginTop: '10px' } }, `${fmt(waiting.length)} new jobs are waiting to be scored. Once they are scored, the ones that don't fit drop off this list.`) : null);
-    const byCo = {}; d.portal_jobs.filter(inRegion).forEach((j) => { (byCo[j.company] ||= { Gulf: 0, India: 0, Europe: 0, Other: 0, n: 0 }); byCo[j.company][RCOLOR[j.region] ? j.region : 'Other']++; byCo[j.company].n++; });
+    const byCo = {}; d.portal_jobs.filter(inRegion).forEach((j) => { (byCo[j.company] ||= { Gulf: 0, India: 0, Europe: 0, APAC: 0, Canada: 0, Other: 0, n: 0 }); byCo[j.company][RCOLOR[j.region] ? j.region : 'Other']++; byCo[j.company].n++; });
     const top = Object.entries(byCo).sort((a, b) => b[1].n - a[1].n).slice(0, 10), max = top.length ? top[0][1].n : 1;
     const hiring = h('section', { class: 'panel' },
       h('h2', {}, 'Who is hiring most'),
       h('p', { class: 'sub' }, 'Open roles per company in the latest scan. Tap a company to see its roles.'),
       top.length ? h('div', { class: 'hbars' }, top.map(([name, c]) => h('button', { class: 'hbar', type: 'button', onclick: () => { state.q = ''; $('#q').value = ''; go('open', { company: name }); } },
-        h('span', { class: 'nm' }, name), h('span', { class: 'tr', style: { width: (c.n / max * 100) + '%' } }, ['Gulf', 'India', 'Europe', 'Other'].filter((r) => c[r]).map((r) => h('span', { style: { width: (c[r] / c.n * 100) + '%', background: rc(r) } }))), h('span', { class: 'n' }, fmt(c.n)))))
+        h('span', { class: 'nm' }, name), h('span', { class: 'tr', style: { width: (c.n / max * 100) + '%' } }, ['Gulf', 'India', 'Europe', 'APAC', 'Canada', 'Other'].filter((r) => c[r]).map((r) => h('span', { style: { width: (c[r] / c.n * 100) + '%', background: rc(r) } }))), h('span', { class: 'n' }, fmt(c.n)))))
         : h('p', { class: 'empty' }, 'No open roles in this region yet.'),
       h('div', { class: 'legend' }, REGIONS.map((r) => h('span', {}, h('span', { class: 'dot', style: { background: r.color } }), r.id)), h('span', {}, h('span', { class: 'dot', style: { background: 'var(--multi)' } }), 'Several locations')));
     const savedJobs = d.portal_jobs.filter((j) => saved.has(j.key)).filter(inRegion);
@@ -591,7 +593,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
           h('span', { class: 't' }, j.role), h('span', { class: 'm' }, j.company), h('span', { class: 'm' }, [showStatus(j.status) !== c.name ? showStatus(j.status) : null, day(j.date_found)].filter(Boolean).join(', '))))
         : h('p', { class: 'muted', style: { fontSize: '.84rem', margin: '4px' } }, 'None'));
     }));
-    return h('section', { class: 'panel' }, h('h2', {}, 'My applications'), h('p', { class: 'sub' }, 'Every job in your Gulf, India and Europe trackers, by stage. Swipe sideways to see every stage. Tap a job for its details.'), board);
+    return h('section', { class: 'panel' }, h('h2', {}, 'My applications'), h('p', { class: 'sub' }, 'Every job in your Gulf, India, Europe, APAC and Canada trackers, by stage. Swipe sideways to see every stage. Tap a job for its details.'), board);
   }
 
   function viewCompanies() {
@@ -624,10 +626,10 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const lines = list.map((c, i) => `${i + 1}. ${c.company}\n   Search in: ${c.regions}\n   Careers page: ${c.careers_url || 'none known: search the web and LinkedIn for its current openings'}\n   Search terms: ${c.search_terms || 'Business Analyst'}`);
     return ['I am a banking business analyst (TCS BaNCS, securities processing, requirements, UAT) looking for new jobs. Please check these employers for current openings. Do not apply, log in, create accounts or submit anything.', '',
       'For each company below, open its careers page (or, if it has none, search the web and LinkedIn for its current openings) and find jobs posted in the last 7 days that match any of these roles: Business Analyst, Functional Analyst, Systems Analyst, Techno-Functional Consultant, Functional Consultant, Business Consultant, Product Owner, Data Analyst, or any TCS BaNCS role. Also use the company\'s own search terms listed below.', '',
-      'Only include jobs located in the regions listed for that company:', '- Gulf = UAE, Saudi Arabia, Qatar, Oman, Bahrain, Kuwait', '- India = India', '- Europe = any European country, including the UK', '',
+      'Only include jobs located in the regions listed for that company:', '- Gulf = UAE, Saudi Arabia, Qatar, Oman, Bahrain, Kuwait', '- India = India', '- Europe = any European country, including the UK', '- APAC = Singapore, Hong Kong, Malaysia', '- Canada = Canada', '',
       `Companies (batch ${n} of ${total}):`, ...lines, '',
       'Give me the result as a CSV file named chatgpt_results_YYYYMMDD_HHMM.csv (use today\'s date and time), with exactly these columns:', 'Company,Role Title,Location,Link,Job ID,Date Posted,Region,Portal Searched',
-      '- One row per job. Link must be the direct link to that job posting.', '- Leave Job ID or Date Posted empty if the posting does not show it. Region is Gulf, India or Europe.', '- Only include jobs you actually saw. Do not guess or fill in details.', '',
+      '- One row per job. Link must be the direct link to that job posting.', '- Leave Job ID or Date Posted empty if the posting does not show it. Region is Gulf, India, Europe, APAC or Canada.', '- Only include jobs you actually saw. Do not guess or fill in details.', '',
       'After the CSV, list which companies you covered and which you could not check, with a one-line reason for each.'].join('\n');
   }
   function viewChatGPT() {
@@ -692,7 +694,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       const search = h('input', { class: 'co-search', type: 'search', placeholder: 'Find a company', value: scan.q, 'aria-label': 'Find a company', oninput: (e) => { scan.q = e.target.value; const pos = e.target.selectionStart; renderScan(); const f = $('.co-search'); if (f) { f.focus(); f.setSelectionRange(pos, pos); } } });
       const targets = scanTargets();
       body = [
-        h('div', {}, h('span', { class: 'step-label' }, 'Region'), h('div', { class: 'choice-row' }, ['All', 'Gulf', 'India', 'Europe'].map(regChip))),
+        h('div', {}, h('span', { class: 'step-label' }, 'Region'), h('div', { class: 'choice-row' }, ['All', 'Gulf', 'India', 'Europe', 'APAC', 'Canada'].map(regChip))),
         h('div', {}, h('span', { class: 'step-label' }, 'Companies'), h('div', { class: 'choice-row' }, modeChip('all', `All set-up portals (${fmt(pool.length)})`), modeChip('pick', 'Choose companies'))),
         scan.mode === 'pick' ? h('div', {}, search, h('div', { class: 'co-pick' }, list.length ? list.map((c) => h('label', {},
           h('input', { type: 'checkbox', checked: scan.picked.has(c.id), onchange: (e) => { e.target.checked ? scan.picked.add(c.id) : scan.picked.delete(c.id); renderScan(); } }),
