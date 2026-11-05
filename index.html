@@ -263,6 +263,17 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 .ck-steps b { font-weight: 600; }
 .ck-acts { display: flex; flex-wrap: wrap; gap: 8px; }
 .ck-more { font-size: .86rem; color: var(--muted); margin: 0; }
+.ck-act { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ck-act .btn { padding: 6px 12px; font-size: .86rem; }
+.ck-fit { margin-top: 4px; display: grid; gap: 6px; font-size: .88rem; }
+.ck-fit .v { font: 700 1rem/1.2 var(--cond); }
+.ck-fit .v.apply { color: var(--ok); } .ck-fit .v.maybe { color: var(--primary); } .ck-fit .v.skip { color: var(--warn); }
+.ck-fit ul { margin: 0; padding-left: 18px; color: var(--muted); }
+.ck-form { display: grid; gap: 8px; margin-top: 6px; }
+.ck-form textarea, .ck-form input, .ck-form select { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); color: var(--ink); font: inherit; font-size: .88rem; }
+.ck-form textarea { min-height: 110px; resize: vertical; }
+.ck-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ck-wait { color: var(--muted); font-size: .84rem; }
 
 /* ---------- Scan window ---------- */
 .modal { position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 24px)); max-height: min(86vh, 760px); background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
@@ -441,7 +452,9 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   }
   async function open(key, p) {
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(p.iv) }, key, b64(p.ct));
-    state.data = JSON.parse(new TextDecoder().decode(plain));
+    let bytes = plain;
+    if (p.z === 'gzip') bytes = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+    state.data = JSON.parse(new TextDecoder().decode(bytes));
     saved = load(SAVED_KEY); hidden = load(HIDDEN_KEY);
     $('#login').hidden = true; $('#app').hidden = false;
     render();
@@ -564,6 +577,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
         co ? h('button', { class: 'btn quiet', type: 'button', onclick: () => { closeDrawer(); companyDrawer(co); } }, `About ${co.company}`) : null,
       ],
       [link ? h('a', { class: 'btn', href: link, target: '_blank', rel: 'noopener noreferrer' }, 'Open posting') : null,
+       link && !isTracked ? h('button', { class: 'btn quiet', type: 'button', onclick: () => { closeDrawer(); openCheck(link); } }, 'Check fit / track') : null,
        j.key && !isTracked ? h('button', { class: 'btn quiet' + (saved.has(j.key) ? ' on' : ''), type: 'button', onclick: () => { toggleSaved(j.key); jobDrawer(j, opts); } }, saved.has(j.key) ? 'Saved' : 'Save') : null,
        j.key && !isTracked ? h('button', { class: 'btn quiet', type: 'button', onclick: () => { toggleHidden(j.key); closeDrawer(); render(); } }, hidden.has(j.key) ? 'Show again' : 'Hide') : null,
        link ? h('button', { class: 'btn quiet', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch (e) { toast('Copy did not work here: long-press the Open posting button instead'); } } }, 'Copy link') : null]);
@@ -972,6 +986,79 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   }
   $('#run-scan').addEventListener('click', openScan);
 
+
+  // ---------- fit checks and tracker adds (queued for Claude) ----------
+  const REQ_KEY = 'jobdash-req-v1';
+  let localReq = {}; try { localReq = JSON.parse(localStorage.getItem(REQ_KEY) || '{}'); } catch (e) { localReq = {}; }
+  const saveLocalReq = () => { try { localStorage.setItem(REQ_KEY, JSON.stringify(localReq)); } catch (e) { /* per visit */ } };
+  const NEEDS_PASTE = /(indeed|linkedin|naukri|glassdoor|bayt|gulftalent|foundit|monster)\./i;
+  const SOONER = 'Need it sooner? In the Claude app, open the scheduled task "Job fit checks" and run it now.';
+  async function sendRequest(e, kind, extra = {}) {
+    const d = state.data;
+    if (!d.scan_token) { toast('One-tap requests need the scan token. Ask Claude to switch it on.'); return false; }
+    const payload = { kind, url: e.link || extra.url || '', title: extra.title || e.title || '', company: extra.company || e.company || '', location: extra.location || e.location || '', region: extra.region || (REGIONS.some((r) => r.id === e.region) ? e.region : ''), source: extra.source || '', jd: extra.jd || '' };
+    try {
+      await gh('/actions/workflows/requests.yml/dispatches', { method: 'POST', body: JSON.stringify({ ref: 'main', inputs: { payload: JSON.stringify(payload) } }) });
+    } catch (err) { toast(err.status === 422 ? 'That description is too long. Paste the main parts only.' : 'Could not reach GitHub. Try again in a moment.'); return false; }
+    const k = e.k || 'manual:' + payload.title + '|' + payload.company;
+    localReq[k] = { ...(localReq[k] || {}), [kind === 'both' ? 'fit' : kind]: Date.now(), ...(kind === 'both' ? { track: Date.now() } : {}), region: payload.region };
+    saveLocalReq();
+    toast(kind === 'track' ? 'Added to the tracker queue' : 'Fit check requested');
+    return true;
+  }
+  const isRecent = (t) => t && Date.now() - t < 6 * 3600 * 1000;
+  function fitBlock(e) {
+    const f = e.fit; const r = e.req || {}; const loc = localReq[e.k] || {};
+    if (f) {
+      const v = (f.verdict || '').toLowerCase();
+      return h('div', { class: 'ck-fit' },
+        h('div', {}, h('span', { class: 'v ' + v }, `${f.verdict || 'Checked'}: ${f.score}/10`), f.eligibility ? h('span', { class: 'muted' }, `  ·  eligibility ${f.eligibility}`) : null),
+        f.headline ? h('div', {}, f.headline) : null,
+        f.why ? h('div', {}, h('b', {}, 'Why it fits: '), f.why) : null,
+        f.gaps ? h('div', {}, h('b', {}, 'Gaps: '), f.gaps) : null,
+        f.tips ? h('div', {}, h('b', {}, 'If you apply: '), f.tips) : null,
+        h('div', { class: 'ck-wait' }, `Checked ${when(f.checked_at)}`));
+    }
+    if (r.fit === 'queued' || isRecent(loc.fit)) return h('div', { class: 'ck-wait' }, `Queued ${r.fit_requested_at ? when(r.fit_requested_at) : 'just now'}. Claude checks the queue every hour (8 am to 11 pm IST). ${SOONER}`);
+    if (r.fit === 'error') return h('div', { class: 'ck-wait' }, `The last check didn't finish: ${r.fit_error || 'unknown error'}.`);
+    if (r.fit === 'needs_jd') return [h('div', { class: 'ck-wait' }, 'This site didn\'t let the scanner read the job description. Paste it here and Claude will check it.'), jdForm(e, 'fit')];
+    return null;
+  }
+  function jdForm(e, kind, opts = {}) {
+    const ta = h('textarea', { placeholder: 'Paste the full job description (responsibilities and requirements)', 'aria-label': 'Job description' });
+    const fields = opts.manual ? {
+      title: h('input', { placeholder: 'Job title', value: e.title || '' }), company: h('input', { placeholder: 'Company', value: e.company || '' }),
+      location: h('input', { placeholder: 'City, country', value: e.location || '' }),
+      region: h('select', { 'aria-label': 'Tracker' }, h('option', { value: '' }, 'Which tracker?'), REGIONS.map((r) => h('option', { value: r.id }, r.id))),
+    } : null;
+    const go = async (k) => {
+      const jd = ta.value.trim();
+      const extra = { jd };
+      if (fields) Object.assign(extra, { title: fields.title.value.trim(), company: fields.company.value.trim(), location: fields.location.value.trim(), region: fields.region.value });
+      if ((k === 'fit' || k === 'both') && jd.length < 200) { toast('Paste the job description first'); return; }
+      if (fields && (!extra.title || !extra.company)) { toast('Add the job title and company'); return; }
+      if ((k === 'track' || k === 'both') && fields && !extra.region) { toast('Choose which tracker'); return; }
+      if (await sendRequest(e, k, extra)) refreshCheck();
+    };
+    return h('div', { class: 'ck-form' },
+      fields ? [h('div', { class: 'row2' }, fields.title, fields.company), h('div', { class: 'row2' }, fields.location, fields.region)] : null, ta,
+      h('div', { class: 'ck-act' },
+        h('button', { class: 'btn', type: 'button', onclick: () => go(kind) }, kind === 'fit' ? 'Check fit now' : kind === 'both' ? 'Check fit and add to tracker' : 'Add to tracker'),
+        opts.manual ? h('button', { class: 'btn quiet', type: 'button', onclick: () => go('track') }, 'Just add to tracker') : null));
+  }
+  function trackBlock(e) {
+    const r = e.req || {}; const loc = localReq[e.k] || {};
+    if (r.track === 'queued' || isRecent(loc.track)) return h('div', { class: 'ck-wait' }, `Added to the queue. It goes into your ${r.region || loc.region || 'matching'} tracker the next time the hourly sync runs with your laptop on and Excel closed.`);
+    if (r.track === 'error') return h('div', { class: 'ck-wait' }, `Couldn't add it: ${r.track_error || 'unknown error'}.`);
+    const known = REGIONS.some((x) => x.id === e.region);
+    const sel = known ? null : h('select', { 'aria-label': 'Which tracker', style: { padding: '6px 8px', borderRadius: '8px', border: '1px solid var(--line)', background: 'var(--sunk)', color: 'var(--ink)' } }, h('option', { value: '' }, 'Which tracker?'), REGIONS.map((x) => h('option', { value: x.id }, x.id)));
+    return h('div', { class: 'ck-act' }, sel, h('button', { class: 'btn quiet', type: 'button', onclick: async () => {
+      const region = known ? e.region : sel.value; if (!region) { toast('Choose which tracker'); return; }
+      if (await sendRequest(e, 'track', { region })) refreshCheck();
+    } }, `Add to ${known ? e.region + ' ' : ''}tracker`));
+  }
+  function refreshCheck() { const inp = $('.ck-input input'); if (inp) inp.dispatchEvent(new Event('input')); }
+
   // ---------- check a job ----------
   const STOP = new Set(['the', 'and', 'for', 'with', 'job', 'jobs', 'role', 'at', 'in', 'of', 'a', 'an', '-', '|', '&', 'to']);
   const JOB_BOARDS = { 'indeed': 'Indeed', 'linkedin': 'LinkedIn', 'naukri': 'Naukri', 'bayt': 'Bayt', 'glassdoor': 'Glassdoor', 'gulftalent': 'GulfTalent', 'monster': 'Monster', 'foundit': 'foundit', 'jobstreet': 'JobStreet', 'reed': 'Reed', 'totaljobs': 'Totaljobs' };
@@ -1011,6 +1098,8 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     d.portal_jobs.forEach((j) => { const e = get(j.link, j.key); e.open = j; fill(e, j); });
     (d.waiting_jobs || []).forEach((j) => { const e = get(j.link, j.key); e.waiting = j; fill(e, j); });
     d.scored_jobs.forEach((j) => { const e = get(j.link || j.key, j.key); e.scored = j; fill(e, j); });
+    (d.requests || []).forEach((r) => { const e = get(r.url, 'req:' + r.id); e.req = r; fill(e, r); });
+    (d.fit_results || []).forEach((r) => { const e = get(r.url, 'req:' + r.id); e.fit = r; fill(e, r); });
     (d.trackers || []).forEach((j) => { const e = get(j.link, j.key); (e.tracked ||= []).push(j); fill(e, j); if (j.job_id) idsOf(j.job_id).forEach((x) => e.ids.add(x)); });
     map.forEach((e) => { if (!e.title && e.link) { const u = parseUrl(e.link); const last = (u.pathname.split('/').filter(Boolean).pop() || '').replace(/_[A-Za-z]*\d[\w-]*$/, ''); if (/[a-z]-[a-z]/i.test(last)) e.title = decodeURIComponent(last).replace(/-/g, ' '); } });
     ckIndex = [...map.values()];
@@ -1047,6 +1136,10 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       if (st === 'Shortlisted') return ['info', 'Shortlisted by you, not applied yet'];
       return ['info', `In your ${t.region} tracker, not applied yet`];
     }
+    if (e.fit) return [/apply/i.test(e.fit.verdict) ? 'good' : /skip/i.test(e.fit.verdict) ? 'warn' : 'info', `Fit check: ${e.fit.verdict || 'done'}, ${e.fit.score}/10`];
+    if (e.req?.fit === 'queued' || isRecent((localReq[e.k] || {}).fit)) return ['info', 'Fit check queued'];
+    if (e.req?.fit === 'needs_jd') return ['warn', 'Paste the job description to check fit'];
+    if (e.req?.track === 'queued') return ['info', 'Queued for your tracker'];
     if (e.scored) return ['info', `Scored ${e.scored.score}/10, not in a tracker yet`];
     if (e.waiting || e.scan?.o === 'pending') return ['info', 'Found by the scanner, waiting to be scored'];
     if (e.open) return ['none', 'Open role the scanner saw, not scored'];
@@ -1066,19 +1159,25 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       : o === 'region-not-targeted' ? `Skipped: you don't target ${x.r} at ${x.n || 'this company'}.`
       : o === 'baseline' ? 'Already open when this portal was first added, so it was recorded but not scored.'
       : o === 'old' ? 'Posted more than 10 days before the scanner first found it, so it wasn\'t scored.'
-      : o === 'pending' ? (e.scored ? 'Reported as a new job and sent for scoring.' : 'Reported as a new job; waiting to be scored.')
+      : o === 'pending' ? (e.scored || e.fit ? 'Reported as a new job and sent for scoring.' : 'Reported as a new job; waiting to be scored.')
       : o === 'kept' ? 'Open role in your regions.'
       : o === 'seen-earlier' ? 'Seen by the scanner in an earlier scan (details from before 5 Nov weren\'t recorded).' : '';
     return seenTxt + msg + gone;
   }
   function ckCard(e) {
     const [tone, label] = verdictOf(e); const t = (e.tracked || [])[0];
-    const step = (yes, title, text) => h('li', {}, h('span', { class: 'ic ' + (yes === true ? 'yes' : yes === false ? 'no' : '') }, yes === true ? '✓' : yes === false ? '–' : '?'), h('span', {}, h('b', {}, title), text ? h('div', { class: 'muted', style: { fontSize: '.86rem' } }, text) : null));
+    const step = (yes, title, text, extra) => h('li', {}, h('span', { class: 'ic ' + (yes === true ? 'yes' : yes === false ? 'no' : '') }, yes === true ? '✓' : yes === false ? '–' : '?'), h('span', {}, h('b', {}, title), text ? h('div', { class: 'muted', style: { fontSize: '.86rem' } }, text) : null, extra || null));
     const story = scanStory(e);
     const steps = [
       step(!!(e.scan || e.open), 'Career-portal scanner', story || (e.tracked ? `Not from the scanner (${t.source || 'added another way'}).` : 'Not seen by the scanner.')),
-      step(!!(e.scored || (t && t.score != null)), 'Fit check against your resume', e.scored ? `${e.scored.score}/10${e.scored.eligibility ? `, eligibility ${e.scored.eligibility}` : ''}${e.scored.why ? `. ${e.scored.why}` : ''}` : t && t.score != null ? `${t.score}/10${t.eligibility ? `, eligibility ${t.eligibility}` : ''}${t.why ? `. ${t.why}` : ''}` : 'Not scored yet.'),
-      step(!!t, 'Your trackers', t ? [`${t.region} tracker: ${showStatus(t.status)}`, t.applied_date ? `applied ${day(t.applied_date)} (${ago(t.applied_date)})` : null, t.resume ? `resume ${t.resume}` : null, t.next_action ? `next: ${t.next_action}` : null].filter(Boolean).join(', ') + ((e.tracked || []).length > 1 ? `. Appears ${(e.tracked || []).length} times in your trackers.` : '') : 'Not in any tracker.'),
+      (() => {
+        const prior = e.scored ? `${e.scored.score}/10${e.scored.eligibility ? `, eligibility ${e.scored.eligibility}` : ''}${e.scored.why ? `. ${e.scored.why}` : ''}` : t && t.score != null ? `${t.score}/10${t.eligibility ? `, eligibility ${t.eligibility}` : ''}${t.why ? `. ${t.why}` : ''}` : null;
+        const fb = fitBlock(e);
+        const needPaste = !fb && NEEDS_PASTE.test(e.host || '') && !(e.req && e.req.has_jd);
+        const btn = fb ? null : needPaste ? jdForm(e, 'fit') : h('div', { class: 'ck-act' }, h('button', { class: 'btn', type: 'button', onclick: async () => { if (await sendRequest(e, 'fit')) refreshCheck(); } }, prior ? 'Check again in detail' : 'Check fit now'));
+        return step(!!(e.fit || prior), 'Fit check against your resume', e.fit ? null : prior || (fb ? null : 'Not checked yet.'), [fb, btn]);
+      })(),
+      t ? step(true, 'Your trackers', [`${t.region} tracker: ${showStatus(t.status)}`, t.applied_date ? `applied ${day(t.applied_date)} (${ago(t.applied_date)})` : null, t.resume ? `resume ${t.resume}` : null, t.next_action ? `next: ${t.next_action}` : null].filter(Boolean).join(', ') + ((e.tracked || []).length > 1 ? `. Appears ${(e.tracked || []).length} times in your trackers.` : '')) : step(false, 'Your trackers', 'Not in any tracker.', trackBlock(e)),
     ];
     const detail = t || e.scored || e.open || { role: e.title, company: e.company, location: e.location, region: e.region, link: e.link };
     const link = safe(e.link || detail.link);
@@ -1093,17 +1192,21 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   function notFound(r) {
     const d = state.data; const last = (d.scan_meta[0] || {}).started;
     if (r.kind === 'url') {
+      const sent = localReq[normUrl(r.u)];
+      if (sent && (isRecent(sent.fit) || isRecent(sent.track))) return [h('p', {}, h('strong', {}, 'Request sent.'), ` ${isRecent(sent.fit) ? 'Claude checks the queue every hour (8 am to 11 pm IST); the result appears here. ' + SOONER : ''}${isRecent(sent.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`)];
       const board = Object.keys(JOB_BOARDS).find((b) => r.host.includes(b));
       const portal = d.portal_hosts && Object.entries(d.portal_hosts).find(([hh]) => r.host === hh || r.host.endsWith('.' + hh) || hh.endsWith(r.host));
       const listed = d.companies.find((c) => { const cu = parseUrl(c.careers_url); return cu && (cu.hostname.replace(/^www\./, '') === r.host); });
-      if (board) return [h('p', {}, h('strong', {}, `Not checked yet.`), ` The scanner reads company career portals, not ${JOB_BOARDS[board]}. ${JOB_BOARDS[board]} jobs reach your trackers through your email alerts, and this one isn't in any tracker.`), h('p', { class: 'ck-hint' }, 'Tip: search for the job title and company instead. If the company has its own portal on your list, the scanner may have it under a different link.')];
+      const manual = () => { const e = { k: normUrl(r.u), link: r.u.href, host: r.host, title: '', company: '', location: '', region: '' }; const loc = localReq[e.k]; return loc && (isRecent(loc.fit) || isRecent(loc.track)) ? h('p', { class: 'ck-wait' }, `Request sent. ${isRecent(loc.fit) ? 'Claude checks the queue every hour (8 am to 11 pm IST). ' + SOONER : ''}${isRecent(loc.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`) : h('div', {}, h('p', { class: 'ck-hint', style: { marginTop: '4px' } }, 'Check it now: fill in the basics and paste the description.'), jdForm(e, 'both', { manual: true })); };
+      if (board) return [h('p', {}, h('strong', {}, `Not checked yet.`), ` The scanner reads company career portals, not ${JOB_BOARDS[board]}, and this job isn't in your trackers. Tip: search the title and company too, in case it's there without a link.`), manual()];
       if (portal) {
         const [, co] = portal; const c = d.companies.find((x) => x.id === co.id);
         return [h('p', {}, h('strong', {}, 'The scanner missed this one.'), ` It covers ${co.name}${c && c.last_scan ? ` (last scanned ${when(c.last_scan)})` : ''}, but hasn't seen this job. Usually it was posted after that scan, its title doesn't match your search terms, or it's outside the regions you target there.`),
-          h('div', { class: 'ck-acts' }, d.scan_token || true ? h('button', { class: 'btn', type: 'button', onclick: () => { scan.region = 'All'; scan.mode = 'pick'; scan.picked = new Set([co.id]); scan.running = null; renderScan(); } }, `Scan ${co.name} now`) : null)];
+          h('div', { class: 'ck-acts' }, d.scan_token || true ? h('button', { class: 'btn', type: 'button', onclick: () => { scan.region = 'All'; scan.mode = 'pick'; scan.picked = new Set([co.id]); scan.running = null; renderScan(); } }, `Scan ${co.name} now`) : null,
+            h('button', { class: 'btn quiet', type: 'button', onclick: async () => { const e = { k: normUrl(r.u), link: r.u.href, host: r.host, title: '', company: co.name, location: '', region: '' }; if (await sendRequest(e, 'fit', { company: co.name })) refreshCheck(); } }, 'Check fit now'))];
       }
-      if (listed) return [h('p', {}, h('strong', {}, 'Not checked yet.'), ` ${listed.company} is on your list, but its portal isn't set up for automatic scanning (${listed.scan_status}). It's in the ChatGPT handoff.`)];
-      return [h('p', {}, h('strong', {}, 'Not checked yet.'), ' This site isn\'t one of the portals the scanner reads, and the job isn\'t in your trackers or scored jobs.')];
+      if (listed) return [h('p', {}, h('strong', {}, 'Not checked yet.'), ` ${listed.company} is on your list, but its portal isn't set up for automatic scanning (${listed.scan_status}). It's in the ChatGPT handoff.`), manual()];
+      return [h('p', {}, h('strong', {}, 'Not checked yet.'), ' This site isn\'t one of the portals the scanner reads, and the job isn\'t in your trackers or scored jobs.'), manual()];
     }
     return [h('p', {}, h('strong', {}, 'No match.'), ` Nothing the scanner has seen${last ? ` (latest scan ${when(last)})` : ''}, nothing scored and nothing in your trackers matches that. Try fewer words, the company name, or paste the job link.`)];
   }
