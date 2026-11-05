@@ -243,6 +243,27 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 @media (max-width: 1000px) { .pulse { grid-template-columns: minmax(0, 200px) minmax(0, 1fr); } .pulse > :last-child { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .pulse { grid-template-columns: 1fr; } .app-table .hide-sm { display: none; } }
 
+/* ---------- Check a job ---------- */
+.ck-input { display: flex; gap: 8px; }
+.ck-input input { flex: 1; min-width: 0; padding: 11px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); color: var(--ink); font: inherit; }
+.ck-input input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.ck-hint { font-size: .84rem; color: var(--muted); margin: 0; }
+.ck-card { border: 1px solid var(--line); border-left: 4px solid var(--c, var(--primary)); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 10px; background: var(--surface); }
+.ck-card .t { font-weight: 700; } .ck-card .m { font-size: .86rem; color: var(--muted); }
+.ck-verdict { display: inline-flex; align-items: center; gap: 6px; font: 700 .95rem/1.2 var(--cond); padding: 5px 10px; border-radius: 999px; justify-self: start; }
+.ck-verdict.good { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+.ck-verdict.info { background: color-mix(in srgb, var(--primary) 14%, transparent); color: var(--primary); }
+.ck-verdict.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.ck-verdict.none { background: var(--sunk); color: var(--muted); }
+.ck-steps { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ck-steps li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font-size: .9rem; align-items: start; }
+.ck-steps .ic { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; font-weight: 700; background: var(--sunk); color: var(--muted); }
+.ck-steps .ic.yes { background: var(--primary); color: var(--paper); }
+.ck-steps .ic.no { background: color-mix(in srgb, var(--warn) 20%, transparent); color: var(--warn); }
+.ck-steps b { font-weight: 600; }
+.ck-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.ck-more { font-size: .86rem; color: var(--muted); margin: 0; }
+
 /* ---------- Scan window ---------- */
 .modal { position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 24px)); max-height: min(86vh, 760px); background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
 .modal-scrim { position: fixed; inset: 0; background: rgba(10, 20, 18, .45); z-index: 50; }
@@ -343,6 +364,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
         <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input type="search" id="q" placeholder="Search jobs and companies" aria-label="Search jobs and companies"></label>
         <span class="kbd" aria-hidden="true">/</span>
+        <button class="btn quiet" id="check-job" type="button" title="Paste a job link or ID to see if it was already checked">Check a job</button>
         <button class="btn" id="run-scan" type="button">Run a scan</button>
         <button class="theme-btn" id="theme" type="button" aria-label="Colour theme"></button>
       </div>
@@ -533,8 +555,9 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
           ['Confidence', j.confidence], ['Eligibility', j.eligibility],
           ['Status', isTracked ? h('span', { class: 'pill ' + statusTone(j.status) }, showStatus(j.status)) : null],
           ['Source', j.source], ['Next action', j.next_action ? `${j.next_action}${j.next_action_due ? ' by ' + day(j.next_action_due) : ''}` : null],
-          ['Applied', j.applied_date ? `${day(j.applied_date)} (${daysSince(j.applied_date)} days ago)` : null],
+          ['Applied', j.applied_date ? `${day(j.applied_date)} (${ago(j.applied_date)})` : null],
           ['Resume used', j.resume || null],
+          ['Gaps', j.gaps || null], ['Job ID', j.job_id || null], ['Notes', j.notes || null],
           ['Posted', j.posted ? day(j.posted) : null], ['First seen', j.first_seen ? day(j.first_seen) : null], ['Found', j.date_found ? day(j.date_found) : null],
           ['Priority', co ? co.priority : j.priority], ['TCS BaNCS', co && co.bancs_note ? co.bancs_note : null],
         ]),
@@ -579,6 +602,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   const todayIST = () => new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
   const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const daysSince = (iso) => { if (!iso) return null; const a = new Date(iso + 'T00:00:00'); const b = new Date(ymd(todayIST()) + 'T00:00:00'); return Math.round((b - a) / 86400000); };
+  const ago = (iso) => { const n = daysSince(iso); return n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`; };
   const isApplied = (j) => !!j.applied_date && !/^(New|Needs JD|Shortlisted)$/.test(j.status);
   const GOAL_KEY = 'jobdash-goal-v1';
   let goal = 10; try { goal = Number(localStorage.getItem(GOAL_KEY)) || 10; } catch (e) { goal = 10; }
@@ -948,8 +972,167 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   }
   $('#run-scan').addEventListener('click', openScan);
 
+  // ---------- check a job ----------
+  const STOP = new Set(['the', 'and', 'for', 'with', 'job', 'jobs', 'role', 'at', 'in', 'of', 'a', 'an', '-', '|', '&', 'to']);
+  const JOB_BOARDS = { 'indeed': 'Indeed', 'linkedin': 'LinkedIn', 'naukri': 'Naukri', 'bayt': 'Bayt', 'glassdoor': 'Glassdoor', 'gulftalent': 'GulfTalent', 'monster': 'Monster', 'foundit': 'foundit', 'jobstreet': 'JobStreet', 'reed': 'Reed', 'totaljobs': 'Totaljobs' };
+  function parseUrl(raw) {
+    let t = String(raw || '').trim(); if (!t) return null;
+    if (!/^https?:\/\//i.test(t)) { if (/^[\w-]+(\.[\w-]+)+\//.test(t)) t = 'https://' + t; else return null; }
+    try { return new URL(t); } catch (e) { return null; }
+  }
+  function normUrl(u) {
+    if (!u) return '';
+    const segs = u.pathname.toLowerCase().split('/').filter((x) => x && !/^[a-z]{2}(-[a-z]{2})?$/.test(x));
+    return u.hostname.replace(/^www\./, '').toLowerCase() + '/' + segs.join('/');
+  }
+  function idsOf(raw) {
+    const ids = new Set(); const u = parseUrl(raw);
+    const add = (x) => { x = String(x || '').trim().toLowerCase(); if (x.length >= 3) ids.add(x); };
+    if (u) {
+      ['jk', 'vjk', 'pid', 'currentjobid', 'jobid', 'job_id', 'id', 'reqid'].forEach((k) => { for (const [kk, v] of u.searchParams) if (kk.toLowerCase() === k) add(v); });
+      const segs = u.pathname.split('/').filter(Boolean);
+      const last = segs[segs.length - 1] || '';
+      const wd = last.match(/_([A-Za-z]*\d[\w-]*)$/); if (wd) add(wd[1]);
+      const jm = u.pathname.match(/\/(?:job|jobs|view|requisitions?|preview)\/(\d{3,})/i); if (jm) add(jm[1]);
+      (u.pathname.match(/\d{5,}/g) || []).forEach(add);
+    } else if (!/\s/.test(String(raw).trim())) add(String(raw).trim().replace(/^#/, ''));
+    return ids;
+  }
+  let ckIndex = null;
+  function buildIndex() {
+    const d = state.data, map = new Map();
+    const get = (link, fallbackKey) => {
+      const u = parseUrl(link); const k = u ? normUrl(u) : 'k:' + fallbackKey;
+      if (!map.has(k)) map.set(k, { k, link: u ? link : '', host: u ? u.hostname.replace(/^www\./, '').toLowerCase() : '', ids: idsOf(link), title: '', company: '', location: '', region: '' });
+      return map.get(k);
+    };
+    const fill = (e, j) => { e.title ||= j.role || j.title || j.t || ''; e.company ||= j.company || j.n || ''; e.location ||= j.location || j.l || ''; e.region ||= j.region || j.r || ''; };
+    (d.lookup || []).forEach((x) => { const e = get(x.u, x.u); e.scan = x; fill(e, x); });
+    d.portal_jobs.forEach((j) => { const e = get(j.link, j.key); e.open = j; fill(e, j); });
+    (d.waiting_jobs || []).forEach((j) => { const e = get(j.link, j.key); e.waiting = j; fill(e, j); });
+    d.scored_jobs.forEach((j) => { const e = get(j.link || j.key, j.key); e.scored = j; fill(e, j); });
+    (d.trackers || []).forEach((j) => { const e = get(j.link, j.key); (e.tracked ||= []).push(j); fill(e, j); if (j.job_id) idsOf(j.job_id).forEach((x) => e.ids.add(x)); });
+    map.forEach((e) => { if (!e.title && e.link) { const u = parseUrl(e.link); const last = (u.pathname.split('/').filter(Boolean).pop() || '').replace(/_[A-Za-z]*\d[\w-]*$/, ''); if (/[a-z]-[a-z]/i.test(last)) e.title = decodeURIComponent(last).replace(/-/g, ' '); } });
+    ckIndex = [...map.values()];
+  }
+  function ckSearch(q) {
+    if (!ckIndex) buildIndex();
+    q = q.trim(); if (!q) return { kind: 'empty', hits: [] };
+    const u = parseUrl(q);
+    if (u) {
+      const nk = normUrl(u), host = u.hostname.replace(/^www\./, '').toLowerCase(), ids = idsOf(q);
+      const hits = ckIndex.filter((e) => e.k === nk || [...ids].some((x) => e.ids.has(x) && (!e.host || e.host === host || !e.link)));
+      return { kind: 'url', u, host, ids, hits };
+    }
+    const ids = idsOf(q);
+    if (ids.size && /\d/.test(q) && !/\s/.test(q)) {
+      const hits = ckIndex.filter((e) => [...ids].some((x) => e.ids.has(x)));
+      if (hits.length) return { kind: 'id', hits };
+    }
+    const toks = q.toLowerCase().split(/[\s,()/]+/).filter((t) => t.length > 1 && !STOP.has(t));
+    if (!toks.length) return { kind: 'text', hits: [] };
+    const scored = ckIndex.map((e) => { const hay = `${e.title} ${e.company} ${e.location}`.toLowerCase(); const n = toks.filter((t) => hay.includes(t)).length; return { e, n }; })
+      .filter((x) => x.n === toks.length || (toks.length >= 4 && x.n >= toks.length - 1))
+      .sort((a, b) => b.n - a.n || rank(b.e) - rank(a.e));
+    return { kind: 'text', toks, hits: scored.map((x) => x.e), total: scored.length };
+  }
+  const rank = (e) => (e.tracked ? 4 : 0) + (e.scored ? 2 : 0) + (e.open ? 1 : 0);
+  const SKIP_STATUSES = /^(Not a Fit|Withdrawn|Closed)$/;
+  function verdictOf(e) {
+    const t = (e.tracked || [])[0];
+    if (t) {
+      const st = t.status || '';
+      if (t.applied_date && !/^(New|Needs JD|Shortlisted)$/.test(st)) return ['good', st === 'Applied' ? `You applied on ${day(t.applied_date)}` : `${showStatus(st)} (applied ${day(t.applied_date)})`];
+      if (SKIP_STATUSES.test(st)) return ['none', `You skipped it: ${st}`];
+      if (st === 'Shortlisted') return ['info', 'Shortlisted by you, not applied yet'];
+      return ['info', `In your ${t.region} tracker, not applied yet`];
+    }
+    if (e.scored) return ['info', `Scored ${e.scored.score}/10, not in a tracker yet`];
+    if (e.waiting || e.scan?.o === 'pending') return ['info', 'Found by the scanner, waiting to be scored'];
+    if (e.open) return ['none', 'Open role the scanner saw, not scored'];
+    if (e.scan) return ['warn', 'Seen by the scanner, filtered out'];
+    return ['none', 'Found'];
+  }
+  function scanStory(e) {
+    const x = e.scan; const lastScan = (state.data.scan_meta[0] || {}).started || '';
+    if (!x && !e.open) return null;
+    if (!x) return `Open now, first seen ${day(e.open.first_seen)}.`;
+    if (x.o === 'seen-earlier' && e.open) return `Open role in your regions, first seen ${day(e.open.first_seen)}.`;
+    const o = x.o || '';
+    const seenTxt = x.f ? `First seen ${day(x.f)}${x.s && x.s !== x.f ? `, last seen ${day(x.s)}` : ''}. ` : '';
+    const gone = x.s && lastScan && x.s < lastScan.slice(0, 10) ? ' It wasn\'t in the latest scan, so it has probably closed.' : '';
+    const msg = o.startsWith('excluded:') ? `Skipped by the title filter (the title contains "${o.slice(9)}"). Tell Claude if that filter is too strict.`
+      : o === 'other-region' ? `Skipped: the location (${x.l || 'unknown'}) is outside your five regions.`
+      : o === 'region-not-targeted' ? `Skipped: you don't target ${x.r} at ${x.n || 'this company'}.`
+      : o === 'baseline' ? 'Already open when this portal was first added, so it was recorded but not scored.'
+      : o === 'old' ? 'Posted more than 10 days before the scanner first found it, so it wasn\'t scored.'
+      : o === 'pending' ? (e.scored ? 'Reported as a new job and sent for scoring.' : 'Reported as a new job; waiting to be scored.')
+      : o === 'kept' ? 'Open role in your regions.'
+      : o === 'seen-earlier' ? 'Seen by the scanner in an earlier scan (details from before 5 Nov weren\'t recorded).' : '';
+    return seenTxt + msg + gone;
+  }
+  function ckCard(e) {
+    const [tone, label] = verdictOf(e); const t = (e.tracked || [])[0];
+    const step = (yes, title, text) => h('li', {}, h('span', { class: 'ic ' + (yes === true ? 'yes' : yes === false ? 'no' : '') }, yes === true ? '✓' : yes === false ? '–' : '?'), h('span', {}, h('b', {}, title), text ? h('div', { class: 'muted', style: { fontSize: '.86rem' } }, text) : null));
+    const story = scanStory(e);
+    const steps = [
+      step(!!(e.scan || e.open), 'Career-portal scanner', story || (e.tracked ? `Not from the scanner (${t.source || 'added another way'}).` : 'Not seen by the scanner.')),
+      step(!!(e.scored || (t && t.score != null)), 'Fit check against your resume', e.scored ? `${e.scored.score}/10${e.scored.eligibility ? `, eligibility ${e.scored.eligibility}` : ''}${e.scored.why ? `. ${e.scored.why}` : ''}` : t && t.score != null ? `${t.score}/10${t.eligibility ? `, eligibility ${t.eligibility}` : ''}${t.why ? `. ${t.why}` : ''}` : 'Not scored yet.'),
+      step(!!t, 'Your trackers', t ? [`${t.region} tracker: ${showStatus(t.status)}`, t.applied_date ? `applied ${day(t.applied_date)} (${ago(t.applied_date)})` : null, t.resume ? `resume ${t.resume}` : null, t.next_action ? `next: ${t.next_action}` : null].filter(Boolean).join(', ') + ((e.tracked || []).length > 1 ? `. Appears ${(e.tracked || []).length} times in your trackers.` : '') : 'Not in any tracker.'),
+    ];
+    const detail = t || e.scored || e.open || { role: e.title, company: e.company, location: e.location, region: e.region, link: e.link };
+    const link = safe(e.link || detail.link);
+    return h('article', { class: 'ck-card', style: { '--c': rc(e.region || detail.region) } },
+      h('span', { class: 'ck-verdict ' + tone }, label),
+      h('div', {}, h('div', { class: 't' }, e.title || detail.role || 'Untitled job'), h('div', { class: 'm' }, [e.company, e.location].filter(Boolean).join(', '))),
+      h('ul', { class: 'ck-steps' }, steps),
+      h('div', { class: 'ck-acts' },
+        h('button', { class: 'btn quiet', type: 'button', onclick: () => { closeModal(); jobDrawer({ ...detail, ...(e.scored && !t ? e.scored : {}), why: (t && t.why) || e.scored?.why || detail.why, link: link || detail.link }, { tracked: !!t }); } }, 'Details'),
+        link ? h('a', { class: 'btn quiet', href: link, target: '_blank', rel: 'noopener noreferrer' }, 'Open posting') : null));
+  }
+  function notFound(r) {
+    const d = state.data; const last = (d.scan_meta[0] || {}).started;
+    if (r.kind === 'url') {
+      const board = Object.keys(JOB_BOARDS).find((b) => r.host.includes(b));
+      const portal = d.portal_hosts && Object.entries(d.portal_hosts).find(([hh]) => r.host === hh || r.host.endsWith('.' + hh) || hh.endsWith(r.host));
+      const listed = d.companies.find((c) => { const cu = parseUrl(c.careers_url); return cu && (cu.hostname.replace(/^www\./, '') === r.host); });
+      if (board) return [h('p', {}, h('strong', {}, `Not checked yet.`), ` The scanner reads company career portals, not ${JOB_BOARDS[board]}. ${JOB_BOARDS[board]} jobs reach your trackers through your email alerts, and this one isn't in any tracker.`), h('p', { class: 'ck-hint' }, 'Tip: search for the job title and company instead. If the company has its own portal on your list, the scanner may have it under a different link.')];
+      if (portal) {
+        const [, co] = portal; const c = d.companies.find((x) => x.id === co.id);
+        return [h('p', {}, h('strong', {}, 'The scanner missed this one.'), ` It covers ${co.name}${c && c.last_scan ? ` (last scanned ${when(c.last_scan)})` : ''}, but hasn't seen this job. Usually it was posted after that scan, its title doesn't match your search terms, or it's outside the regions you target there.`),
+          h('div', { class: 'ck-acts' }, d.scan_token || true ? h('button', { class: 'btn', type: 'button', onclick: () => { scan.region = 'All'; scan.mode = 'pick'; scan.picked = new Set([co.id]); scan.running = null; renderScan(); } }, `Scan ${co.name} now`) : null)];
+      }
+      if (listed) return [h('p', {}, h('strong', {}, 'Not checked yet.'), ` ${listed.company} is on your list, but its portal isn't set up for automatic scanning (${listed.scan_status}). It's in the ChatGPT handoff.`)];
+      return [h('p', {}, h('strong', {}, 'Not checked yet.'), ' This site isn\'t one of the portals the scanner reads, and the job isn\'t in your trackers or scored jobs.')];
+    }
+    return [h('p', {}, h('strong', {}, 'No match.'), ` Nothing the scanner has seen${last ? ` (latest scan ${when(last)})` : ''}, nothing scored and nothing in your trackers matches that. Try fewer words, the company name, or paste the job link.`)];
+  }
+  const ck = { q: '' };
+  function openCheck(prefill) {
+    if (prefill != null) ck.q = prefill;
+    const close = h('button', { class: 'close', type: 'button', 'aria-label': 'Close', onclick: closeModal }, svg('<path d="M6 6l12 12M18 6L6 18"/>', 16));
+    const input = h('input', { type: 'search', value: ck.q, placeholder: 'Paste a job link, a job ID, or type a title and company', 'aria-label': 'Job link, ID or title', autocomplete: 'off',
+      oninput: (e) => { ck.q = e.target.value; clearTimeout(ck.t); ck.t = setTimeout(showResults, 150); } });
+    const results = h('div', { id: 'ck-results', style: { display: 'grid', gap: '12px' } });
+    function showResults() {
+      const r = ckSearch(ck.q);
+      if (r.kind === 'empty') return results.replaceChildren(h('p', { class: 'ck-hint' }, 'Works with links from company portals, Indeed and LinkedIn, Workday IDs like R158179, or words like "business analyst state street".'));
+      const hits = r.hits.slice(0, 6);
+      results.replaceChildren(...(hits.length ? hits.map(ckCard) : notFound(r)),
+        ...(r.kind === 'text' && r.hits.length > 6 ? [h('p', { class: 'ck-more' }, `${r.hits.length - 6} more matches. Add a word or two to narrow it down.`)] : []));
+    }
+    $('#modal-root').replaceChildren(h('div', { class: 'modal-scrim', onclick: closeModal }),
+      h('section', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Check a job' },
+        h('header', {}, h('h2', {}, 'Check a job'), h('p', { class: 'muted', style: { margin: 0, fontSize: '.9rem' } }, 'See whether a job was already scanned, scored against your resume, applied to or skipped.'), close),
+        h('div', { class: 'body' }, h('div', { class: 'ck-input' }, input), results)));
+    showResults(); input.focus(); input.select();
+  }
+  $('#check-job').addEventListener('click', () => openCheck());
+
+
   // ---------- inputs ----------
   let qt = null;
+  $('#q').addEventListener('paste', (e) => { const t = (e.clipboardData || window.clipboardData).getData('text'); if (parseUrl(t)) { e.preventDefault(); openCheck(t.trim()); } });
   $('#q').addEventListener('input', (e) => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.limit = {}; if (state.tab === 'today' && state.q) state.tab = 'open'; render(); }, 160); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && $('#modal-root').firstChild) { closeModal(); return; }
