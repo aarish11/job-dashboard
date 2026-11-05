@@ -1161,6 +1161,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       : o === 'old' ? 'Posted more than 10 days before the scanner first found it, so it wasn\'t scored.'
       : o === 'pending' ? (e.scored || e.fit ? 'Reported as a new job and sent for scoring.' : 'Reported as a new job; waiting to be scored.')
       : o === 'kept' ? 'Open role in your regions.'
+      : o === 'title-not-searched' ? 'Seen in the newest-jobs listing, but skipped: the title doesn\'t contain any of your search words (analyst, consultant, product owner, requirements, functional and similar). Tell Claude if it should.'
       : o === 'seen-earlier' ? 'Seen by the scanner in an earlier scan (details from before 5 Nov weren\'t recorded).' : '';
     return seenTxt + msg + gone;
   }
