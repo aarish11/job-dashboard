@@ -517,8 +517,12 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const open = d.portal_jobs.filter(inRegion), waiting = (d.waiting_jobs || []).filter(inRegion), scored = d.scored_jobs.filter(inRegion);
     return [
       { id: 'open', label: 'Open roles', rows: open, hint: 'at your target companies', go: () => go('open') },
-      { id: 'new', label: 'New this scan', rows: waiting.concat(scored), hint: `${fmt(waiting.length)} waiting to be scored`, go: () => go('today') },
-      { id: 'scored', label: 'Scored 7+', rows: scored.filter((j) => Number(j.score) >= 7), hint: 'strong matches', go: () => go('today') },
+      { id: 'new', label: 'New this scan', rows: waiting.concat(scored), hint: `${fmt(waiting.length)} waiting to be scored`,
+        go: () => listDrawer('New this scan', `${fmt(scored.length)} scored, ${fmt(waiting.length)} waiting to be scored. Best match on top.`,
+          byScore(scored).concat(waiting), { score: true, when: (x) => (x.score != null ? null : x.posted ? 'Posted ' + day(x.posted) : 'Not scored yet') }) },
+      { id: 'scored', label: 'Scored 7+', rows: scored.filter((j) => Number(j.score) >= 7), hint: 'strong matches',
+        go: () => listDrawer('Scored 7+', 'Strong matches from the latest scan, best match on top. These also go to your ATS pipeline inbox.',
+          byScore(scored.filter((j) => Number(j.score) >= 7)), { score: true }) },
       { id: 'short', label: 'Shortlisted by you', rows: st(['Shortlisted']), hint: 'ready to apply', go: () => go('apps') },
       { id: 'applied', label: 'Applied', rows: st(['Applied']), hint: '', go: () => go('apps') },
       { id: 'int', label: 'Interviews', rows: st(['Screening', 'Interview']), hint: '', go: () => go('apps') },
@@ -552,6 +556,13 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       h('header', {}, h('h2', {}, title), sub, close), h('div', { class: 'body' }, body), actions ? h('div', { class: 'actions' }, actions) : null);
     $('#drawer-root').replaceChildren(h('div', { class: 'scrim', onclick: closeDrawer }), panel);
     close.focus();
+  }
+  const byScore = (rows) => rows.slice().sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
+  // A list of jobs in the side drawer, used by the "New this scan" and "Scored 7+" tiles.
+  function listDrawer(title, sub, rows, opts, limit = 60) {
+    drawer('var(--primary)', title, h('div', { class: 'muted' }, sub),
+      [rows.length ? h('div', { class: 'rows' }, rows.slice(0, limit).map((j) => jobRow(j, opts))) : h('p', { class: 'empty' }, 'Nothing here yet. Jobs appear after the next scan.'),
+       rows.length > limit ? h('div', { class: 'more' }, h('button', { class: 'btn quiet', type: 'button', onclick: () => listDrawer(title, sub, rows, opts, limit + 60) }, `Show ${fmt(Math.min(60, rows.length - limit))} more of ${fmt(rows.length - limit)}`)) : null]);
   }
   const dl = (pairs) => h('dl', {}, pairs.filter(([, v]) => v != null && v !== '').map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]));
   function jobDrawer(j, opts = {}) {
