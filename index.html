@@ -891,7 +891,8 @@ body { background: var(--paper); }
     foundCache = [...map.values()].map((j) => {
       const s = scoredBy.get(j.key), r = reqBy.get(j.key);
       const extra = s ? { score: s.score, why: s.why, confidence: s.confidence, eligibility: s.eligibility, gaps: s.gaps, verdict: s.verdict, scored_at: s.scored_at } : {};
-      return { ...j, ...extra, seenDay: istDay(j.seen), fitState: s && s.score != null ? 'scored' : r && r.fit === 'queued' ? 'queued' : 'not' };
+      const u = parseUrl(j.link || j.key), loc = u ? localReq[normUrl(u)] : null;
+      return { ...j, ...extra, seenDay: istDay(j.seen), fitState: s && s.score != null ? 'scored' : (r && r.fit === 'queued') || (loc && isRecent(loc.fit)) ? 'queued' : 'not' };
     });
     return foundCache;
   }
@@ -1307,7 +1308,7 @@ body { background: var(--paper); }
     } catch (err) { toast(err.status === 422 ? 'That description is too long. Paste the main parts only.' : 'Could not reach GitHub. Try again in a moment.'); return false; }
     const k = e.k || 'manual:' + payload.title + '|' + payload.company;
     localReq[k] = { ...(localReq[k] || {}), [kind === 'both' ? 'fit' : kind]: Date.now(), ...(kind === 'both' ? { track: Date.now() } : {}), region: payload.region };
-    saveLocalReq();
+    saveLocalReq(); foundCache = null; render();
     if (kind !== 'review') toast(kind === 'track' ? 'Added to the tracker queue' : 'Fit check requested');
     return true;
   }
