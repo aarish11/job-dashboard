@@ -931,7 +931,7 @@ body { background: var(--paper); }
         rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => jobRow(j, { score: true, extra: fstateTag, when: foundWhen(range) })))
           : h('p', { class: 'empty' }, range === 'today' ? `Nothing new found today yet${state.region !== 'All' ? ' in ' + state.region : ''}. The next automatic scan is ${nextScan()}. Try Yesterday or Last 7 days.` : 'No roles match. Try a wider date range or clear the search box.'),
         moreBtn('found', rows.length, Math.min(rows.length, lim)),
-        h('p', { class: 'sub', style: { marginTop: '12px' } }, 'Scored jobs come first, best match on top. "Not shortlisted" means the scanner\'s free title filter didn\'t pick it for scoring. To score one anyway, star it or open it and choose Check fit / track.')),
+        h('p', { class: 'sub', style: { marginTop: '12px' } }, 'Scored jobs come first, best match on top. "Not shortlisted" means the scanner\'s free title filter didn\'t pick it for scoring. To score one anyway, open it and choose Check fit / track: it moves to "Queued for scoring" and gets scored at the next fit-check run.')),
     ];
   }
 
