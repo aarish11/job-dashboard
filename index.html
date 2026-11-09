@@ -11,32 +11,75 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --paper: #EEF2F1; --surface: #FFFFFF; --sunk: #F5F8F7; --ink: #16302B; --muted: #5E716C; --line: #D3DCD9;
-  --primary: #0F5C4F; --primary-ink: #FFFFFF; --primary-soft: #DCEBE7;
-  --gulf: #B8791E; --india: #4B4FB0; --europe: #1E7C99; --apac: #9C3F6E; --canada: #5E7F2C; --multi: #8A9A96;
-  --ok: #2F7A4A; --warn: #A5620F; --bad: #B4372D;
-  --r-sm: 6px; --r-md: 12px; --r-lg: 18px;
-  --shadow: 0 1px 2px rgba(22, 48, 43, .06), 0 8px 24px rgba(22, 48, 43, .08);
+  /* Bright light (day) */
+  --paper: #F5F6FF; --surface: #FFFFFF; --sunk: #F3F4FB; --ink: #1B1D3A; --muted: #5E6385; --line: #E3E6F3;
+  --primary: #6C3BFF; --primary-ink: #FFFFFF; --primary-soft: #EFE8FF;
+  --gulf: #D98A1E; --india: #5B5FE0; --europe: #1A9CC4; --apac: #E0479A; --canada: #5FA82A; --multi: #8D92B3;
+  --ok: #0E9F6E; --warn: #D97F00; --bad: #E0453A;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 18px; --r: 8px;
+  --shadow: 0 1px 2px rgba(27, 29, 58, .05), 0 10px 30px rgba(108, 59, 255, .08);
   --body: "IBM Plex Sans", system-ui, sans-serif;
-  --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --cond: "IBM Plex Sans Condensed", system-ui, sans-serif;
+  --page-bg: linear-gradient(160deg, #F4F7FF 0%, #FFF6FB 55%, #F2FFFA 100%);
+  --side-bg: #FFFFFF; --top-bg: rgba(255, 255, 255, .78);
+  --brand: linear-gradient(90deg, #6C3BFF, #FF3D9A);
+  --grad-a: linear-gradient(135deg, #00C9A7, #00A3FF); --glow-a: 0 12px 26px rgba(0, 163, 255, .25);
+  --grad-b: linear-gradient(135deg, #7B5CFF, #FF4FA3); --glow-b: 0 12px 26px rgba(255, 79, 163, .25);
+  --grad-c: linear-gradient(135deg, #FFB300, #FF6A3D); --glow-c: 0 12px 26px rgba(255, 106, 61, .25);
+  --grad-d: linear-gradient(135deg, #8E94B8, #5E6385); --glow-d: 0 12px 26px rgba(94, 99, 133, .2);
+  --nav-on: linear-gradient(90deg, #6C3BFF, #B44BFF); --nav-on-ink: #FFFFFF; --nav-on-shadow: 0 8px 20px rgba(108, 59, 255, .25); --nav-on-badge: #FFFFFF; --nav-on-badge-ink: #6C3BFF;
+  --nav-hover: linear-gradient(90deg, #EFE8FF, rgba(255, 255, 255, 0) 85%); --nav-edge: #B44BFF; --nav-hover-ink: #6C3BFF;
+  --chip-on: linear-gradient(135deg, #6C3BFF, #FF3D9A); --chip-on-ink: #FFFFFF; --chip-glow: 0 6px 16px rgba(255, 61, 154, .3);
+  --row-hover: linear-gradient(90deg, #F1ECFF, rgba(255, 255, 255, 0) 70%);
+  --star: #FFB300; --star-glow: none;
+  --s9: linear-gradient(135deg, #1EE3A0, #00B37E); --s8: linear-gradient(135deg, #3FB8FF, #2D6BFF); --s7: linear-gradient(135deg, #FFC93C, #FF8A00);
+  --s9-ink: #FFFFFF; --s8-ink: #FFFFFF; --s7-ink: #FFFFFF; --s9-glow: 0 6px 14px rgba(0, 179, 126, .35);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0F1A18; --surface: #172522; --sunk: #13201D; --ink: #E4EDEA; --muted: #8FA39E; --line: #2A3C38;
-    --primary: #5FC2AA; --primary-ink: #0B1F1A; --primary-soft: #1D3A33;
-    --gulf: #E0A85A; --india: #9A9DF2; --europe: #62BCD6; --apac: #E58BB6; --canada: #A6C76A; --multi: #6F827E;
-    --ok: #74C894; --warn: #E4A653; --bad: #F08A80;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .35);
+    --paper: #0A0A16; --surface: #121029; --sunk: #0E0C20; --ink: #ECEAFF; --muted: #9C96CF; --line: #2B2650;
+    --primary: #00E5F5; --primary-ink: #0A0A16; --primary-soft: #123A4A;
+    --gulf: #FFB547; --india: #9A9DFF; --europe: #4FE3FF; --apac: #FF6EC7; --canada: #A6E35A; --multi: #7C76AE;
+    --ok: #3DFFB0; --warn: #FFC84D; --bad: #FF6B6B;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 30px rgba(0, 0, 0, .45);
+    --page-bg: radial-gradient(60% 50% at 85% 0%, #2A0F4D 0%, transparent 60%), radial-gradient(50% 50% at 0% 100%, #003B4D 0%, transparent 60%), #0A0A16;
+    --side-bg: rgba(10, 10, 22, .82); --top-bg: rgba(12, 10, 28, .72);
+    --brand: linear-gradient(90deg, #00F0FF, #B26BFF, #FF3DCB);
+    --grad-a: linear-gradient(135deg, #00C2FF, #6A5CFF); --glow-a: 0 10px 30px rgba(0, 194, 255, .33);
+    --grad-b: linear-gradient(135deg, #B26BFF, #FF3DCB); --glow-b: 0 10px 30px rgba(255, 61, 203, .33);
+    --grad-c: linear-gradient(135deg, #FFB020, #FF5E3A); --glow-c: 0 10px 30px rgba(255, 138, 42, .33);
+    --grad-d: linear-gradient(135deg, #3A355F, #231F45); --glow-d: 0 10px 30px rgba(0, 0, 0, .35);
+    --nav-on: linear-gradient(90deg, rgba(255, 61, 203, .2), rgba(0, 240, 255, .08)); --nav-on-ink: #FFFFFF; --nav-on-shadow: inset 3px 0 0 #FF3DCB, 0 0 18px rgba(255, 61, 203, .25); --nav-on-badge: #FF3DCB; --nav-on-badge-ink: #FFFFFF;
+    --nav-hover: linear-gradient(90deg, rgba(0, 240, 255, .15), transparent 85%); --nav-edge: #00F0FF; --nav-hover-ink: #FFFFFF;
+    --chip-on: linear-gradient(135deg, #00F0FF, #B26BFF); --chip-on-ink: #0A0A16; --chip-glow: 0 0 20px rgba(0, 240, 255, .5);
+    --row-hover: linear-gradient(90deg, rgba(0, 240, 255, .12), transparent 70%);
+    --star: #FFD84D; --star-glow: drop-shadow(0 0 7px rgba(255, 216, 77, .8));
+    --s9: linear-gradient(135deg, #3DFFB0, #00D68F); --s8: linear-gradient(135deg, #4FE3FF, #2E8BFF); --s7: linear-gradient(135deg, #FFD84D, #FF9F1C);
+    --s9-ink: #062A1C; --s8-ink: #04122A; --s7-ink: #2A1A05; --s9-glow: 0 0 16px rgba(61, 255, 176, .6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #0F1A18; --surface: #172522; --sunk: #13201D; --ink: #E4EDEA; --muted: #8FA39E; --line: #2A3C38;
-  --primary: #5FC2AA; --primary-ink: #0B1F1A; --primary-soft: #1D3A33;
-  --gulf: #E0A85A; --india: #9A9DF2; --europe: #62BCD6; --apac: #E58BB6; --canada: #A6C76A; --multi: #6F827E;
-  --ok: #74C894; --warn: #E4A653; --bad: #F08A80;
-  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .35);
+  --paper: #0A0A16; --surface: #121029; --sunk: #0E0C20; --ink: #ECEAFF; --muted: #9C96CF; --line: #2B2650;
+  --primary: #00E5F5; --primary-ink: #0A0A16; --primary-soft: #123A4A;
+  --gulf: #FFB547; --india: #9A9DFF; --europe: #4FE3FF; --apac: #FF6EC7; --canada: #A6E35A; --multi: #7C76AE;
+  --ok: #3DFFB0; --warn: #FFC84D; --bad: #FF6B6B;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 30px rgba(0, 0, 0, .45);
+  --page-bg: radial-gradient(60% 50% at 85% 0%, #2A0F4D 0%, transparent 60%), radial-gradient(50% 50% at 0% 100%, #003B4D 0%, transparent 60%), #0A0A16;
+  --side-bg: rgba(10, 10, 22, .82); --top-bg: rgba(12, 10, 28, .72);
+  --brand: linear-gradient(90deg, #00F0FF, #B26BFF, #FF3DCB);
+  --grad-a: linear-gradient(135deg, #00C2FF, #6A5CFF); --glow-a: 0 10px 30px rgba(0, 194, 255, .33);
+  --grad-b: linear-gradient(135deg, #B26BFF, #FF3DCB); --glow-b: 0 10px 30px rgba(255, 61, 203, .33);
+  --grad-c: linear-gradient(135deg, #FFB020, #FF5E3A); --glow-c: 0 10px 30px rgba(255, 138, 42, .33);
+  --grad-d: linear-gradient(135deg, #3A355F, #231F45); --glow-d: 0 10px 30px rgba(0, 0, 0, .35);
+  --nav-on: linear-gradient(90deg, rgba(255, 61, 203, .2), rgba(0, 240, 255, .08)); --nav-on-ink: #FFFFFF; --nav-on-shadow: inset 3px 0 0 #FF3DCB, 0 0 18px rgba(255, 61, 203, .25); --nav-on-badge: #FF3DCB; --nav-on-badge-ink: #FFFFFF;
+  --nav-hover: linear-gradient(90deg, rgba(0, 240, 255, .15), transparent 85%); --nav-edge: #00F0FF; --nav-hover-ink: #FFFFFF;
+  --chip-on: linear-gradient(135deg, #00F0FF, #B26BFF); --chip-on-ink: #0A0A16; --chip-glow: 0 0 20px rgba(0, 240, 255, .5);
+  --row-hover: linear-gradient(90deg, rgba(0, 240, 255, .12), transparent 70%);
+  --star: #FFD84D; --star-glow: drop-shadow(0 0 7px rgba(255, 216, 77, .8));
+  --s9: linear-gradient(135deg, #3DFFB0, #00D68F); --s8: linear-gradient(135deg, #4FE3FF, #2E8BFF); --s7: linear-gradient(135deg, #FFD84D, #FF9F1C);
+  --s9-ink: #062A1C; --s8-ink: #04122A; --s7-ink: #2A1A05; --s9-glow: 0 0 16px rgba(61, 255, 176, .6);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -66,25 +109,6 @@ button { cursor: pointer; }
 .btn.on { background: var(--primary-soft); color: var(--ink); border-color: var(--primary); }
 .err { color: var(--bad); min-height: 1.3em; font-size: .9rem; }
 
-/* ---------- Shell ---------- */
-.shell { max-width: 1240px; margin: 0 auto; padding: 18px 20px 40px; }
-.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
-.brand { font: 700 1.5rem/1 var(--cond); margin: 0; letter-spacing: -.01em; }
-.brand small { display: block; font: 400 .8rem/1.4 var(--body); color: var(--muted); letter-spacing: 0; margin-top: 4px; }
-.top-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-left: auto; }
-.regions { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; }
-.regions button { border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; font-size: .9rem; }
-.regions button[aria-pressed=true] { background: var(--ink); color: var(--paper); }
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
-.search { position: relative; }
-.search input { width: 230px; padding: 8px 12px 8px 32px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
-.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-.kbd { font-size: .75rem; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
-.tabs { display: flex; gap: 2px; margin: 18px 0 20px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
-.tabs button { border: 0; background: none; padding: 10px 14px; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; display: inline-flex; gap: 8px; align-items: center; }
-.tabs button[aria-selected=true] { color: var(--ink); border-color: var(--ink); font-weight: 600; }
-.badge { font: 600 .75rem/1 var(--cond); background: var(--primary-soft); color: var(--ink); padding: 3px 7px; border-radius: 999px; }
-
 /* ---------- Pipeline strip (the signature piece) ---------- */
 .pipeline { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); overflow: hidden; }
 .stage { position: relative; border: 0; background: transparent; text-align: left; padding: 16px 16px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
@@ -110,7 +134,7 @@ button { cursor: pointer; }
 }
 
 /* ---------- Region cards ---------- */
-.region-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+.region-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
 .rcard { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-md); padding: 14px 16px; text-align: left; display: grid; gap: 10px; border-top: 4px solid var(--c); }
 .rcard[aria-pressed=true] { outline: 2px solid var(--c); outline-offset: -1px; }
 .rcard-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
@@ -126,6 +150,7 @@ button { cursor: pointer; }
 .panel h2 { font: 600 1.15rem/1.25 var(--cond); margin: 0; }
 .panel .sub { font-size: .86rem; color: var(--muted); margin: 4px 0 12px; max-width: 72ch; }
 .panel + .panel { margin-top: 18px; }
+.cols > .panel, .content > .panel { margin-top: 0; }
 .rows { display: flex; flex-direction: column; }
 .row { display: grid; grid-template-columns: 6px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 6px; border: 0; border-bottom: 1px solid var(--line); background: transparent; text-align: left; width: 100%; border-radius: 0; }
 .row:last-child { border-bottom: 0; }
@@ -203,7 +228,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 
 
 /* ---------- Pulse row: goal ring, activity calendar, follow-ups ---------- */
-.pulse { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 320px); gap: 18px; margin-bottom: 18px; align-items: stretch; }
+.pulse { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 18px; align-items: stretch; }
 .ring-wrap { display: grid; justify-items: center; gap: 8px; text-align: center; }
 .ring-wrap svg { width: 132px; height: 132px; }
 .ring-num { font: 700 2rem/1 var(--cond); }
@@ -239,8 +264,6 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 .app-table td { padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .app-table tr { cursor: pointer; } .app-table tbody tr:hover { background: var(--sunk); }
 .app-table .rs { font-size: .8rem; color: var(--muted); max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.theme-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; color: var(--ink); }
-@media (max-width: 1000px) { .pulse { grid-template-columns: minmax(0, 200px) minmax(0, 1fr); } .pulse > :last-child { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .pulse { grid-template-columns: 1fr; } .app-table .hide-sm { display: none; } }
 
 /* ---------- Check a job ---------- */
@@ -305,28 +328,16 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 .note code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; font-size: .85rem; }
 @media (max-width: 640px) { .modal { top: auto; bottom: 0; transform: translateX(-50%); width: 100%; border-radius: var(--r-lg) var(--r-lg) 0 0; max-height: 92vh; } .modal footer { padding-bottom: calc(14px + env(safe-area-inset-bottom)); } }
 
-/* ---------- Bottom nav (phones) ---------- */
-.bottom-nav { display: none; }
-@media (max-width: 860px) {
+@media (max-width: 1100px) {
   .pipeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .stage:nth-child(5) { border-left: 0; }
-  .stage:hover { background: transparent; }
   .stage:nth-child(n+5) { border-top: 1px solid var(--line); }
   .stage:nth-child(4)::after { display: none; }
   .cols { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   body { font-size: 15px; }
-  .shell { padding: 14px 14px calc(84px + env(safe-area-inset-bottom)); }
-  .top-tools { margin-left: 0; width: 100%; }
-  .search { flex: 1; }
-  .search input { width: 100%; }
-  .kbd { display: none; }
-  #run-scan { order: 3; }
-  .tabs { display: none; }
-  .regions { width: 100%; overflow-x: auto; scrollbar-width: none; }
-  .regions button { flex: 1 0 auto; justify-content: center; padding: 7px 10px; }
-  .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 14px; }
+  .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stage { padding: 12px; }
   .stage::after { display: none; }
   .stage + .stage { border-left: 0; }
@@ -343,11 +354,114 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   .drawer dl { grid-template-columns: 6.5rem 1fr; }
   .drawer .actions { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
   @media (prefers-reduced-motion: no-preference) { .drawer { animation: up .25s cubic-bezier(.2,.7,.2,1); } @keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } } }
-  .bottom-nav { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
-  .bottom-nav button { border: 0; background: none; display: grid; justify-items: center; gap: 2px; font-size: .7rem; color: var(--muted); padding: 4px 0; }
-  .bottom-nav button svg { width: 22px; height: 22px; }
-  .bottom-nav button[aria-selected=true] { color: var(--primary); font-weight: 600; }
-  .toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
+}
+
+/* ---------- App frame: side menu + top bar ---------- */
+body { background: var(--paper); }
+.app { display: grid; grid-template-columns: 256px minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; background: var(--page-bg); background-attachment: fixed; }
+.side { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow-y: auto; background: var(--side-bg); backdrop-filter: blur(14px); border-right: 1px solid var(--line); padding: 18px 12px 14px; display: flex; flex-direction: column; gap: 2px; scrollbar-width: thin; z-index: 45; }
+.brand { font: 700 1.4rem/1.1 var(--cond); margin: 0 10px; letter-spacing: -.01em; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.scan-line { font-size: .76rem; color: var(--muted); margin: 4px 10px 12px; line-height: 1.4; }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-grp { display: flex; align-items: center; justify-content: space-between; width: 100%; border: 0; background: none; font: 600 .7rem/1 var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); padding: 14px 10px 6px; text-align: left; }
+.nav-grp:hover { color: var(--ink); }
+.nav-grp .chev { transition: transform .2s ease; display: inline-flex; }
+.nav-grp[aria-expanded=false] .chev { transform: rotate(-90deg); }
+.nav-items { display: flex; flex-direction: column; gap: 2px; }
+.nav-items[hidden] { display: none; }
+.nav-it { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; border: 0; background: transparent; color: var(--ink); text-align: left; padding: 8px 10px 8px 22px; border-radius: 10px; font-size: .92rem; transition: transform .18s ease, background .18s ease, box-shadow .18s ease, color .18s ease; }
+.nav-it.top-level { padding-left: 10px; font-weight: 500; }
+.nav-it .nb { font: 600 .72rem/1 var(--cond); background: var(--sunk); color: var(--muted); padding: 3px 8px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.nav-it[aria-current=page] { background: var(--nav-on); color: var(--nav-on-ink); box-shadow: var(--nav-on-shadow); font-weight: 600; }
+.nav-it[aria-current=page] .nb { background: var(--nav-on-badge); color: var(--nav-on-badge-ink); }
+.nav-it:not([aria-current=page]):hover { background: var(--nav-hover); box-shadow: inset 3px 0 0 var(--nav-edge); color: var(--nav-hover-ink); transform: translateX(4px); }
+.side-foot { margin-top: auto; padding: 14px 6px 0; display: grid; gap: 10px; }
+.side-foot .gen { font-size: .74rem; color: var(--muted); line-height: 1.4; }
+.side .regions { display: none; }
+.nav-scrim { display: none; }
+
+.main { min-width: 0; display: flex; flex-direction: column; }
+.top { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 28px; background: var(--top-bg); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.burger { display: none; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); place-items: center; }
+.crumb { font-size: .9rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.crumb b { color: var(--ink); font-weight: 600; }
+.top .regions { margin-left: auto; }
+.regions { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; }
+.regions button { border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; font-size: .88rem; transition: background .15s ease; }
+.regions button:hover { background: var(--sunk); color: var(--ink); }
+.regions button[aria-pressed=true] { background: var(--ink); color: var(--paper); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.search { position: relative; }
+.search input { width: 260px; padding: 8px 12px 8px 32px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.theme-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; color: var(--ink); }
+.content { padding: 24px 28px 48px; width: 100%; max-width: 1320px; display: grid; gap: 18px; align-content: start; }
+.page-head h1 { font: 700 1.75rem/1.15 var(--cond); margin: 0; letter-spacing: -.01em; }
+.page-head p { margin: 4px 0 0; color: var(--muted); max-width: 80ch; }
+.badge { font: 600 .75rem/1 var(--cond); background: var(--primary-soft); color: var(--ink); padding: 3px 7px; border-radius: 999px; }
+
+/* ---------- Colour tiles and effects ---------- */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.ctile { position: relative; overflow: hidden; border: 0; border-radius: var(--r-md); padding: 14px 16px; color: #fff; text-align: left; display: grid; gap: 2px; background: var(--grad-a); box-shadow: var(--glow-a); transition: transform .18s ease, box-shadow .18s ease, outline-color .18s; outline: 2px solid transparent; outline-offset: 2px; }
+.ctile.b { background: var(--grad-b); box-shadow: var(--glow-b); } .ctile.c { background: var(--grad-c); box-shadow: var(--glow-c); } .ctile.d { background: var(--grad-d); box-shadow: var(--glow-d); }
+.ctile::after { content: ""; position: absolute; right: -28px; top: -28px; width: 110px; height: 110px; border-radius: 50%; background: rgba(255, 255, 255, .12); pointer-events: none; }
+.ctile:hover { transform: translateY(-4px); }
+.ctile[aria-pressed=true] { outline-color: var(--ink); }
+.ctile .n { font: 700 2rem/1.1 var(--cond); letter-spacing: -.02em; }
+.ctile .l { font-size: .84rem; opacity: .92; }
+.score { font: 700 1.05rem/1 var(--cond); min-width: 2.1em; padding: 6px 8px; border-radius: 9px; text-align: center; background: var(--sunk); color: var(--muted); }
+.score.s9 { background: var(--s9); color: var(--s9-ink); box-shadow: var(--s9-glow); }
+.score.s8 { background: var(--s8); color: var(--s8-ink); }
+.score.s7 { background: var(--s7); color: var(--s7-ink); }
+.score.s5 { background: var(--primary-soft); color: var(--ink); }
+.fstate { font-size: .76rem; color: var(--muted); white-space: nowrap; }
+.fstate.q { color: var(--primary); font-weight: 600; }
+.sent-tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--primary); color: var(--primary); white-space: nowrap; margin-left: 6px; font-weight: 600; vertical-align: 1px; }
+.row { transition: background .18s ease, box-shadow .18s ease; }
+.row:hover { background: var(--row-hover); box-shadow: inset 3px 0 0 var(--nav-edge); }
+.star { transition: transform .15s ease; }
+.star:hover { transform: scale(1.25); }
+.star[aria-pressed=true] { color: var(--star); filter: var(--star-glow); }
+.chip { transition: box-shadow .18s ease, background .18s ease; }
+.chip:hover { border-color: var(--primary); }
+.chip[aria-pressed=true] { background: var(--chip-on); color: var(--chip-on-ink); border-color: transparent; box-shadow: var(--chip-glow); }
+.btn { transition: transform .15s ease, box-shadow .15s ease; }
+.btn:not(.quiet):not(:disabled):hover { transform: translateY(-1px); box-shadow: var(--chip-glow); }
+.btn.danger { background: transparent; color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+.btn:disabled { opacity: .5; cursor: default; }
+.stage { transition: background .18s ease; }
+.rcard { transition: transform .18s ease, box-shadow .18s ease; }
+.rcard:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.panel { box-shadow: var(--shadow); }
+.sel-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px; border-bottom: 1px solid var(--line); }
+.sel-row:last-child { border-bottom: 0; }
+.sel-row .row { border-bottom: 0; }
+.sel-row input { width: 18px; height: 18px; margin: 0 6px 0 8px; accent-color: var(--primary); }
+.actbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toast { display: flex; gap: 12px; align-items: center; }
+.toast button { border: 0; background: none; color: var(--primary); font-weight: 700; padding: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .anim > * { animation: fadeUp .38s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i, 0) * 28ms); }
+  .tiles > * { animation: fadeUp .4s cubic-bezier(.2, .7, .2, 1) both; }
+  .tiles > :nth-child(2) { animation-delay: .05s; } .tiles > :nth-child(3) { animation-delay: .1s; } .tiles > :nth-child(4) { animation-delay: .15s; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+
+/* ---------- Narrow screens: menu slides out ---------- */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .side { position: fixed; left: 0; top: 0; bottom: 0; width: min(300px, 86vw); transform: translateX(-105%); transition: transform .25s cubic-bezier(.2, .7, .2, 1); background: var(--surface); box-shadow: var(--shadow); }
+  .app.nav-open .side { transform: none; }
+  .app.nav-open .nav-scrim { display: block; position: fixed; inset: 0; background: rgba(5, 5, 15, .5); z-index: 44; }
+  .burger { display: grid; }
+  .top { padding: 10px 14px; }
+  .top .regions { display: none; }
+  .side .regions { display: flex; flex-wrap: wrap; border-radius: 14px; }
+  .search { order: 5; flex: 1 0 100%; }
+  .search input { width: 100%; }
+  .theme-btn { margin-left: auto; }
+  .content { padding: 16px 14px 48px; }
+  .page-head h1 { font-size: 1.45rem; }
 }
 </style>
 </head>
@@ -366,25 +480,29 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   </form>
 </div>
 
-<div id="app" hidden>
-  <div class="shell">
+<div id="app" class="app" hidden>
+  <aside class="side" id="side" aria-label="Menu">
+    <h1 class="brand">Job Dashboard</h1>
+    <div class="scan-line" id="scan-line"></div>
+    <nav class="nav" id="nav" aria-label="Pages"></nav>
+    <div class="side-foot">
+      <div class="regions" role="group" aria-label="Region" id="regions-side"></div>
+      <div class="gen" id="gen-line"></div>
+      <button class="btn quiet" id="lock" type="button">Sign out</button>
+    </div>
+  </aside>
+  <div class="nav-scrim" id="nav-scrim"></div>
+  <div class="main">
     <header class="top">
-      <h1 class="brand">Job Dashboard<small id="scan-line"></small></h1>
-      <div class="top-tools">
-        <div class="regions" role="group" aria-label="Region" id="regions"></div>
-        <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input type="search" id="q" placeholder="Search jobs and companies" aria-label="Search jobs and companies"></label>
-        <span class="kbd" aria-hidden="true">/</span>
-        <button class="btn quiet" id="check-job" type="button" title="Paste a job link or ID to see if it was already checked">Check a job</button>
-        <button class="btn" id="run-scan" type="button">Run a scan</button>
-        <button class="theme-btn" id="theme" type="button" aria-label="Colour theme"></button>
-      </div>
+      <button class="burger" id="burger" type="button" aria-label="Open menu" aria-controls="side" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="crumb" id="crumb"></div>
+      <div class="regions" role="group" aria-label="Region" id="regions"></div>
+      <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="q" placeholder="Search jobs and companies" aria-label="Search jobs and companies"></label>
+      <button class="theme-btn" id="theme" type="button" aria-label="Colour theme"></button>
     </header>
-    <nav class="tabs" role="tablist" id="tabs"></nav>
-    <main id="view"></main>
-    <footer><span id="gen-line"></span><span><button class="btn quiet" id="lock" type="button">Sign out</button></span></footer>
+    <main id="view" class="content"></main>
   </div>
-  <nav class="bottom-nav" role="tablist" id="bottom-nav" aria-label="Pages"></nav>
 </div>
 
 <div id="drawer-root"></div>
@@ -402,14 +520,31 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   ];
   const RCOLOR = { Gulf: 'var(--gulf)', India: 'var(--india)', Europe: 'var(--europe)', APAC: 'var(--apac)', Canada: 'var(--canada)' };
   const rc = (r) => RCOLOR[r] || 'var(--multi)';
-  const TABS = [
-    { id: 'today', label: 'Today', icon: '<path d="M3 12h4l3 8 4-16 3 8h4"/>' },
-    { id: 'open', label: 'Open roles', icon: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>' },
-    { id: 'apps', label: 'My applications', short: 'Applied', icon: '<path d="M9 11l3 3L21 5"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>' },
-    { id: 'companies', label: 'Companies', icon: '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/>' },
-    { id: 'chatgpt', label: 'ChatGPT handoff', short: 'ChatGPT', icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+  const NAV = [
+    { id: 'home', label: 'Home', desc: 'Your pipeline at a glance, the best of today\'s new jobs and who to follow up with.' },
+    { grp: 'Jobs', items: [
+      { id: 'found', label: 'Found today', desc: 'Jobs the scanner saw for the first time, by day (India time). Pick a date range below.' },
+      { id: 'open', label: 'All open roles', desc: 'Every open role at your target companies, in your regions.' },
+      { id: 'strong', label: 'Strong matches (7+)', desc: 'Jobs scored 7 or more against your resume, best match on top.' },
+      { id: 'starred', label: 'Starred', desc: 'Your starred jobs. Send them to the Resume Review Desk, or clear them to start a fresh batch.' },
+      { id: 'hidden', label: 'Hidden', desc: 'Jobs you hid from the lists.' }] },
+    { grp: 'Applications', items: [
+      { id: 'apps', label: 'Pipeline', desc: 'Every job in your trackers, by stage.' },
+      { id: 'followups', label: 'Follow-ups due', desc: 'Applications with no reply after a week or more.' },
+      { id: 'activity', label: 'My activity', desc: 'Your weekly goal and applications per day.' }] },
+    { grp: 'Companies', items: [
+      { id: 'companies', label: 'All companies', desc: 'Your target companies and how the scanner covers them.' },
+      { id: 'hiring', label: "Who's hiring most", desc: 'Companies with the most open roles in your regions.' },
+      { id: 'chatgpt', label: 'ChatGPT handoff', desc: 'Companies the scanner can\'t cover yet, ready to hand to ChatGPT.' }] },
+    { grp: 'Tools', items: [
+      { id: 'check', label: 'Check a job', action: true },
+      { id: 'scan', label: 'Run a scan', action: true }] },
   ];
-  const state = { tab: 'today', region: 'All', q: '', data: null, f: {}, limit: {}, played: false };
+  const PAGES = {}; NAV.forEach((n) => (n.items ? n.items.forEach((i) => { PAGES[i.id] = { ...i, grp: n.grp }; }) : (PAGES[n.id] = n)));
+  const ALIAS = { today: 'home' };
+  const NAV_KEY = 'jobdash-navclosed-v1';
+  let navClosed = new Set(); try { navClosed = new Set(JSON.parse(localStorage.getItem(NAV_KEY) || '[]')); } catch (e) { navClosed = new Set(); }
+  const state = { tab: 'home', region: 'All', q: '', data: null, f: {}, limit: {}, played: false };
   let saved = new Set(), hidden = new Set();
 
   // ---------- small helpers ----------
@@ -439,7 +574,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   const load = (k) => { try { return new Set(JSON.parse(localStorage.getItem(k) || '[]')); } catch (e) { return new Set(); } };
   const store = (k, set) => { try { localStorage.setItem(k, JSON.stringify([...set])); } catch (e) { /* storage off: keeps for this visit */ } };
   let toastT = null;
-  const toast = (msg) => { document.querySelectorAll('.toast').forEach((t) => t.remove()); const t = h('div', { class: 'toast', role: 'status' }, msg); document.body.append(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 2200); };
+  const toast = (msg, act) => { document.querySelectorAll('.toast').forEach((t) => t.remove()); const t = h('div', { class: 'toast', role: 'status' }, h('span', {}, msg), act ? h('button', { type: 'button', onclick: () => { t.remove(); act.fn(); } }, act.label) : null); document.body.append(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), act ? 7000 : 2200); };
   const grp = (s) => { s = String(s || ''); if (s.startsWith('Rejected')) return 'Rejected'; return s; };
 
   // ---------- decryption ----------
@@ -455,7 +590,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     let bytes = plain;
     if (p.z === 'gzip') bytes = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
     state.data = JSON.parse(new TextDecoder().decode(bytes));
-    saved = load(SAVED_KEY); hidden = load(HIDDEN_KEY);
+    saved = load(SAVED_KEY); hidden = load(HIDDEN_KEY); foundCache = null;
     $('#login').hidden = true; $('#app').hidden = false;
     render();
   }
@@ -484,45 +619,54 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
 
   // ---------- chrome ----------
   function chrome() {
-    const regions = $('#regions'); regions.replaceChildren(
-      h('button', { type: 'button', 'aria-pressed': String(state.region === 'All'), onclick: () => setRegion('All') }, 'All'),
-      ...REGIONS.map((r) => h('button', { type: 'button', 'aria-pressed': String(state.region === r.id), onclick: () => setRegion(r.id) }, h('span', { class: 'dot', style: { background: r.color } }), r.id)));
-    const counts = tabCounts();
-    $('#tabs').replaceChildren(...TABS.map((t) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.id), onclick: () => go(t.id) }, t.label, counts[t.id] != null ? h('span', { class: 'badge' }, fmt(counts[t.id])) : null)));
-    $('#bottom-nav').replaceChildren(...TABS.map((t) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.id), onclick: () => go(t.id) }, svg(t.icon, 22), t.short || t.label)));
+    const regBtns = () => [h('button', { type: 'button', 'aria-pressed': String(state.region === 'All'), onclick: () => setRegion('All') }, 'All'),
+      ...REGIONS.map((r) => h('button', { type: 'button', 'aria-pressed': String(state.region === r.id), onclick: () => setRegion(r.id) }, h('span', { class: 'dot', style: { background: r.color } }), r.id))];
+    $('#regions').replaceChildren(...regBtns()); $('#regions-side').replaceChildren(...regBtns());
+    const counts = navCounts();
+    const item = (i, top) => h('button', { class: 'nav-it' + (top ? ' top-level' : ''), type: 'button', 'aria-current': state.tab === i.id ? 'page' : null,
+      onclick: () => { closeNav(); if (i.id === 'check') openCheck(); else if (i.id === 'scan') openScan(); else go(i.id); } },
+      h('span', {}, i.label), counts[i.id] != null ? h('span', { class: 'nb' }, fmt(counts[i.id])) : null);
+    $('#nav').replaceChildren(...NAV.flatMap((n) => (n.items ? [
+      h('button', { class: 'nav-grp', type: 'button', 'aria-expanded': String(!navClosed.has(n.grp)), onclick: () => { navClosed.has(n.grp) ? navClosed.delete(n.grp) : navClosed.add(n.grp); try { localStorage.setItem(NAV_KEY, JSON.stringify([...navClosed])); } catch (e) { /* per visit */ } chrome(); } },
+        n.grp, h('span', { class: 'chev' }, svg('<path d="m6 9 6 6 6-6"/>', 14))),
+      h('div', { class: 'nav-items', hidden: navClosed.has(n.grp) && !n.items.some((i) => i.id === state.tab) }, n.items.map((i) => item(i)))] : [item(n, true)])));
+    const pg = PAGES[state.tab] || PAGES.home;
+    $('#crumb').replaceChildren(...(pg.grp ? [pg.grp, ' › '] : []), h('b', {}, pg.label));
     const d = state.data, m = d.scan_meta && d.scan_meta[0];
-    $('#scan-line').textContent = m ? `Last scan ${when(m.started)}. Next automatic scan ${nextScan()}` : '';
-    $('#gen-line').textContent = `Site updated ${when(d.generated)}. Saved and hidden jobs are remembered on this device only.`;
+    $('#scan-line').textContent = m ? `Last scan ${when(m.started)}. Next ${nextScan()}` : '';
+    $('#gen-line').textContent = `Site updated ${when(d.generated)}. Stars and hidden jobs are remembered on this device only.`;
   }
+  const closeNav = () => { $('#app').classList.remove('nav-open'); $('#burger').setAttribute('aria-expanded', 'false'); };
+  $('#burger').addEventListener('click', () => { const o = $('#app').classList.toggle('nav-open'); $('#burger').setAttribute('aria-expanded', String(o)); });
+  $('#nav-scrim').addEventListener('click', closeNav);
   function nextScan() {
     // Automatic scans run at about 08:25 and 19:25 India time (GitHub may start them a few minutes late).
     const now = new Date(), ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     const mins = ist.getHours() * 60 + ist.getMinutes();
-    if (mins < 8 * 60 + 25) return 'today about 08:25 IST';
-    if (mins < 19 * 60 + 25) return 'today about 19:25 IST';
-    return 'tomorrow about 08:25 IST';
+    if (mins < 8 * 60 + 25) return 'scan today about 08:25 IST';
+    if (mins < 19 * 60 + 25) return 'scan today about 19:25 IST';
+    return 'scan tomorrow about 08:25 IST';
   }
-  function tabCounts() {
+  function navCounts() {
     const d = state.data;
-    return { today: null, open: d.portal_jobs.filter(inRegion).length, apps: (d.trackers || []).filter(inRegion).length, companies: d.companies.filter(inRegion).length, chatgpt: d.companies.filter((c) => c.scan_status !== 'Scanned').filter(inRegion).length };
+    return { found: foundAll().filter(inRegion).filter((j) => inRange(j, 'today')).length, open: d.portal_jobs.filter(inRegion).length,
+      strong: d.scored_jobs.filter(inRegion).filter((j) => Number(j.score) >= 7).length, starred: saved.size, hidden: hidden.size || null,
+      apps: (d.trackers || []).filter(inRegion).length, followups: fuRows().length, companies: d.companies.filter(inRegion).length,
+      chatgpt: d.companies.filter((c) => c.scan_status !== 'Scanned').filter(inRegion).length };
   }
   const setRegion = (r) => { state.region = r; state.limit = {}; render(); };
-  function go(tab, filters) { state.tab = tab; if (filters) Object.assign(state.f, filters); state.limit = {}; history.replaceState(null, '', '#' + tab); render(); window.scrollTo({ top: 0 }); }
+  function go(tab, filters) { tab = ALIAS[tab] || tab; if (!PAGES[tab] || PAGES[tab].action) tab = 'home'; state.tab = tab; if (filters) Object.assign(state.f, filters); state.limit = {}; history.replaceState(null, '', '#' + tab); render(); window.scrollTo({ top: 0 }); }
 
   // ---------- data shaping ----------
   function stages() {
     const d = state.data, tr = (d.trackers || []).filter(inRegion);
     const split = (rows) => REGIONS.map((r) => [r.id, rows.filter((x) => x.region === r.id).length]).concat([['Other', rows.filter((x) => !RCOLOR[x.region]).length]]);
     const st = (names) => tr.filter((j) => names.includes(grp(j.status)));
-    const open = d.portal_jobs.filter(inRegion), waiting = (d.waiting_jobs || []).filter(inRegion), scored = d.scored_jobs.filter(inRegion);
+    const open = d.portal_jobs.filter(inRegion), scored = d.scored_jobs.filter(inRegion), today = foundAll().filter(inRegion).filter((j) => inRange(j, 'today'));
     return [
       { id: 'open', label: 'Open roles', rows: open, hint: 'at your target companies', go: () => go('open') },
-      { id: 'new', label: 'New this scan', rows: waiting.concat(scored), hint: `${fmt(waiting.length)} waiting to be scored`,
-        go: () => listDrawer('New this scan', `${fmt(scored.length)} scored, ${fmt(waiting.length)} waiting to be scored. Best match on top.`,
-          byScore(scored).concat(waiting), { score: true, when: (x) => (x.score != null ? null : x.posted ? 'Posted ' + day(x.posted) : 'Not scored yet') }) },
-      { id: 'scored', label: 'Scored 7+', rows: scored.filter((j) => Number(j.score) >= 7), hint: 'strong matches',
-        go: () => listDrawer('Scored 7+', 'Strong matches from the latest scan, best match on top. These also go to your ATS pipeline inbox.',
-          byScore(scored.filter((j) => Number(j.score) >= 7)), { score: true }) },
+      { id: 'new', label: 'Found today', rows: today, hint: `${fmt(today.filter((j) => j.fitState === 'queued').length)} queued for scoring`, go: () => go('found', { range: 'today' }) },
+      { id: 'scored', label: 'Scored 7+', rows: scored.filter((j) => Number(j.score) >= 7), hint: 'strong matches', go: () => go('strong') },
       { id: 'short', label: 'Shortlisted by you', rows: st(['Shortlisted']), hint: 'ready to apply', go: () => go('apps') },
       { id: 'applied', label: 'Applied', rows: st(['Applied']), hint: '', go: () => go('apps') },
       { id: 'int', label: 'Interviews', rows: st(['Screening', 'Interview']), hint: '', go: () => go('apps') },
@@ -542,7 +686,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     return h('button', { class: 'row', type: 'button', onclick: () => jobDrawer(j, opts) },
       h('span', { class: 'bar', style: { background: rc(j.region) } }),
       h('span', { style: { minWidth: 0 } }, h('div', { class: 't' }, j.role), h('div', { class: 'm' }, [j.company, j.location].filter(Boolean).join(', '))),
-      h('span', { class: 'r' }, opts.score && j.score != null ? h('span', { class: 'score num' }, j.score) : null, opts.when ? h('span', { class: 'when' }, opts.when(j)) : null, j.key ? starBtn(j.key) : null));
+      h('span', { class: 'r' }, opts.extra ? opts.extra(j) : null, opts.score && j.score != null ? h('span', { class: 'score num ' + scoreCls(j.score) }, j.score) : null, opts.when ? h('span', { class: 'when' }, opts.when(j)) : null, j.key ? starBtn(j.key) : null));
   }
   const moreBtn = (key, total, shown) => (shown < total ? h('div', { class: 'more' }, h('button', { class: 'btn quiet', type: 'button', onclick: () => { state.limit[key] = shown + 60; render(); } }, `Show ${fmt(Math.min(60, total - shown))} more of ${fmt(total - shown)}`)) : null);
 
@@ -689,14 +833,15 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
        found.length ? h('div', {}, h('div', { class: 'muted', style: { fontSize: '.86rem', margin: '8px 0 4px' } }, 'Scored jobs found'), h('div', { class: 'rows' }, found.map((j) => jobRow(j, { score: true })))) : null,
        !applied.length && !found.length ? h('p', { class: 'empty' }, 'Nothing on this day.') : null]);
   }
-  function followUps() {
-    const tr = (state.data.trackers || []).filter(inRegion).filter((j) => j.status === 'Applied' && j.applied_date && daysSince(j.applied_date) >= 7)
-      .sort((a, b) => a.applied_date.localeCompare(b.applied_date));
+  const fuRows = () => (state.data.trackers || []).filter(inRegion).filter((j) => j.status === 'Applied' && j.applied_date && daysSince(j.applied_date) >= 7)
+    .sort((a, b) => a.applied_date.localeCompare(b.applied_date));
+  function followUps(limit = 6) {
+    const tr = fuRows().filter((j) => matchQ(j.role, j.company));
     return h('section', { class: 'panel' },
       h('h2', {}, 'Follow-ups due'),
       h('p', { class: 'sub' }, 'Applications with no reply after a week or more, oldest first. A short note to the recruiter often helps.'),
-      tr.length ? h('div', {}, tr.slice(0, 6).map((j) => { const n = daysSince(j.applied_date); return h('button', { class: 'fu-row', type: 'button', onclick: () => jobDrawer(j, { tracked: true }) }, h('span', { style: { minWidth: 0 } }, h('div', { class: 't' }, j.role), h('div', { class: 'm' }, j.company)), h('span', { class: 'days' + (n >= 14 ? ' old' : '') }, `${n}d`)); }),
-        tr.length > 6 ? h('p', { class: 'muted', style: { fontSize: '.84rem', margin: '8px 4px 0' } }, `and ${tr.length - 6} more on My applications`) : null)
+      tr.length ? h('div', {}, tr.slice(0, limit).map((j) => { const n = daysSince(j.applied_date); return h('button', { class: 'fu-row', type: 'button', onclick: () => jobDrawer(j, { tracked: true }) }, h('span', { style: { minWidth: 0 } }, h('div', { class: 't' }, j.role), h('div', { class: 'm' }, j.company)), h('span', { class: 'days' + (n >= 14 ? ' old' : '') }, `${n}d`)); }),
+        tr.length > limit ? h('button', { class: 'btn quiet', type: 'button', style: { marginTop: '10px' }, onclick: () => go('followups') }, `See all ${tr.length}`) : null)
         : h('p', { class: 'empty' }, 'Nothing to chase yet. Applications appear here after 7 days without a reply.'));
   }
   function scoreHist(rows) {
@@ -707,7 +852,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
   }
 
   // ---------- views ----------
-  function viewToday() {
+  function viewHome() {
     const d = state.data, ss = stages();
     const pipe = h('section', { class: 'pipeline' + (state.played ? '' : ' play'), 'aria-label': 'Your job pipeline' }, ss.map((s) => h('button', { class: 'stage' + (s.rows.length ? '' : ' zero'), type: 'button', onclick: s.go },
       h('span', { class: 'label' }, s.label), h('span', { class: 'big num' }, fmt(s.rows.length)), lane(s.split, s.rows.length), h('span', { class: 'hint' }, s.hint))));
@@ -720,31 +865,179 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
         h('div', { class: 'rcard-head' }, h('strong', {}, r.id), h('span', {}, `${r.city} ${clock(r.tz)}`)),
         h('dl', {}, h('div', {}, h('dt', {}, 'Open roles'), h('dd', {}, fmt(roles))), h('div', {}, h('dt', {}, 'Tracked'), h('dd', {}, fmt(mine.length))), h('div', {}, h('dt', {}, 'Applied'), h('dd', {}, fmt(mine.filter((j) => grp(j.status) === 'Applied').length)))));
     }));
-    const scored = d.scored_jobs.filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location)).sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
-    const waiting = (d.waiting_jobs || []).filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location));
-    const newPanel = h('section', { class: 'panel' },
-      h('h2', {}, 'New since the last scan'),
-      h('p', { class: 'sub' }, 'Scored jobs first, best match on top. Strong matches (7+) also go to your ATS pipeline inbox.'),
-      scoreHist(scored),
-      scored.length || waiting.length ? h('div', { class: 'rows' },
-        scored.slice(0, 30).map((j) => jobRow(j, { score: true })),
-        waiting.slice(0, 30).map((j) => jobRow(j, { when: (x) => (x.posted ? 'Posted ' + day(x.posted) : 'Not scored yet') })))
-        : h('p', { class: 'empty' }, 'Nothing new yet. Jobs posted after the last scan will appear here.'),
-      waiting.length && !scored.length ? h('p', { class: 'sub', style: { marginTop: '10px' } }, `${fmt(waiting.length)} new jobs are waiting to be scored. Once they are scored, the ones that don't fit drop off this list.`) : null);
+    const recent = foundAll().filter(inRegion).filter((j) => inRange(j, '7d')).sort(bestFirst);
+    const best = recent.filter((j) => j.fitState === 'scored').slice(0, 8);
+    const topPanel = h('section', { class: 'panel' },
+      h('h2', {}, 'Best new matches this week'),
+      h('p', { class: 'sub' }, 'Scored jobs first seen in the last 7 days, best match on top.'),
+      best.length ? h('div', { class: 'rows' }, best.map((j) => jobRow(j, { score: true, when: foundWhen('7d') }))) : h('p', { class: 'empty' }, 'No scored jobs from the last 7 days yet. They appear after the twice-daily fit checks.'),
+      h('div', { class: 'actbar', style: { marginTop: '12px' } }, h('button', { class: 'btn', type: 'button', onclick: () => go('found', { range: 'today' }) }, 'See everything found today'), h('button', { class: 'btn quiet', type: 'button', onclick: () => go('strong') }, 'All strong matches')));
+    return [pipe, regionRow, h('div', { class: 'cols' }, topPanel, followUps(5))];
+  }
+
+
+  // ---------- found today ----------
+  const istDay = (iso) => { if (!iso) return ''; const d = new Date(String(iso).length <= 10 ? iso + 'T12:00:00Z' : iso); return isNaN(d) ? '' : d.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }); };
+  const istTime = (iso) => { if (!iso || String(iso).length <= 10) return ''; const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }); };
+  const scoreCls = (s) => { s = Number(s); return s >= 9 ? 's9' : s >= 8 ? 's8' : s >= 7 ? 's7' : s >= 5 ? 's5' : ''; };
+  let foundCache = null;
+  function foundAll() {
+    if (foundCache) return foundCache;
+    const d = state.data, map = new Map();
+    const scoredBy = new Map(d.scored_jobs.map((j) => [j.link || j.key, j]));
+    const reqBy = new Map((d.requests || []).map((r) => [r.url, r]));
+    d.portal_jobs.forEach((j) => map.set(j.key, { ...j, seen: j.first_seen_at || j.first_seen }));
+    (d.waiting_jobs || []).forEach((j) => { if (!map.has(j.key)) map.set(j.key, { ...j, seen: j.found_at }); });
+    foundCache = [...map.values()].map((j) => {
+      const s = scoredBy.get(j.key), r = reqBy.get(j.key);
+      const extra = s ? { score: s.score, why: s.why, confidence: s.confidence, eligibility: s.eligibility, gaps: s.gaps, verdict: s.verdict, scored_at: s.scored_at } : {};
+      return { ...j, ...extra, seenDay: istDay(j.seen), fitState: s && s.score != null ? 'scored' : r && r.fit === 'queued' ? 'queued' : 'not' };
+    });
+    return foundCache;
+  }
+  const RANGES = [['today', 'Today'], ['yesterday', 'Yesterday'], ['7d', 'Last 7 days'], ['any', 'Any time']];
+  function inRange(j, r) {
+    if (r === 'any') return true;
+    const dd = j.seenDay; if (!dd) return false;
+    const t = todayIST(); if (r === 'today') return dd === ymd(t);
+    const y = new Date(t); y.setDate(t.getDate() - 1); if (r === 'yesterday') return dd === ymd(y);
+    const w = new Date(t); w.setDate(t.getDate() - 6); return dd >= ymd(w);
+  }
+  const FSTATE_ORDER = { scored: 0, queued: 1, not: 2 };
+  const bestFirst = (a, b) => (FSTATE_ORDER[a.fitState] - FSTATE_ORDER[b.fitState]) || ((Number(b.score) || 0) - (Number(a.score) || 0)) || String(b.seen || '').localeCompare(String(a.seen || ''));
+  const fstateTag = (j) => (j.fitState === 'queued' ? h('span', { class: 'fstate q' }, 'Queued for scoring') : j.fitState === 'not' ? h('span', { class: 'fstate' }, 'Not shortlisted') : null);
+  const foundWhen = (range) => (j) => (range === 'today' || range === 'yesterday') && istTime(j.seen) ? 'Found ' + istTime(j.seen) : 'Found ' + day(j.seenDay);
+  function viewFound() {
+    const f = state.f, range = f.range || 'today';
+    const base = foundAll().filter(inRegion).filter((j) => inRange(j, range)).filter((j) => matchQ(j.role, j.company, j.location));
+    const n = { scored: base.filter((j) => j.fitState === 'scored'), queued: base.filter((j) => j.fitState === 'queued'), not: base.filter((j) => j.fitState === 'not') };
+    const strong = n.scored.filter((j) => Number(j.score) >= 7).length;
+    const sort = f.fsort || '';
+    const rows = (f.fstate ? base.filter((j) => j.fitState === f.fstate) : base).slice()
+      .sort(sort === 'new' ? (a, b) => String(b.seen || '').localeCompare(String(a.seen || '')) : sort === 'company' ? (a, b) => a.company.localeCompare(b.company) || a.role.localeCompare(b.role) : bestFirst);
+    const lim = state.limit.found || 60;
+    const tile = (cls, key, num, label) => h('button', { class: 'ctile ' + cls, type: 'button', 'aria-pressed': String((f.fstate || '') === key), onclick: () => { f.fstate = f.fstate === key || !key ? '' : key; state.limit = {}; render(); } }, h('span', { class: 'n num' }, fmt(num)), h('span', { class: 'l' }, label));
+    const rangeLabel = RANGES.find(([k]) => k === range)[1].toLowerCase();
+    const sortSel = h('select', { 'aria-label': 'Sort', onchange: (e) => { f.fsort = e.target.value; render(); } }, h('option', { value: '' }, 'Sort: best match'), h('option', { value: 'new' }, 'Sort: newest'), h('option', { value: 'company' }, 'Sort: company A to Z')); sortSel.value = sort;
+    return [
+      h('div', { class: 'tiles' },
+        tile('a', '', base.length, range === 'any' ? 'open roles found' : `found ${rangeLabel}`),
+        tile('b', 'scored', n.scored.length, `scored · ${fmt(strong)} are 7+`),
+        tile('c', 'queued', n.queued.length, 'queued for scoring'),
+        tile('d', 'not', n.not.length, 'not shortlisted')),
+      h('section', { class: 'panel' },
+        h('div', { class: 'controls' }, RANGES.map(([k, l]) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(range === k), onclick: () => { f.range = k; state.limit = {}; render(); } }, l)), sortSel,
+          h('span', { class: 'count' }, `${fmt(rows.length)} role${rows.length === 1 ? '' : 's'}`)),
+        rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => jobRow(j, { score: true, extra: fstateTag, when: foundWhen(range) })))
+          : h('p', { class: 'empty' }, range === 'today' ? `Nothing new found today yet${state.region !== 'All' ? ' in ' + state.region : ''}. The next automatic scan is ${nextScan()}. Try Yesterday or Last 7 days.` : 'No roles match. Try a wider date range or clear the search box.'),
+        moreBtn('found', rows.length, Math.min(rows.length, lim)),
+        h('p', { class: 'sub', style: { marginTop: '12px' } }, 'Scored jobs come first, best match on top. "Not shortlisted" means the scanner\'s free title filter didn\'t pick it for scoring. To score one anyway, star it or open it and choose Check fit / track.')),
+    ];
+  }
+
+  // ---------- strong matches ----------
+  function viewStrong() {
+    const all = state.data.scored_jobs.filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location));
+    const rows = byScore(all.filter((j) => Number(j.score) >= 7));
+    const lim = state.limit.strong || 60;
+    return h('section', { class: 'panel' },
+      h('p', { class: 'sub' }, `${fmt(all.length)} jobs scored so far. How they scored, 1 to 10:`),
+      scoreHist(all),
+      rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => jobRow(j, { score: true, when: (x) => (x.scored_at ? 'Scored ' + day(x.scored_at) : null) }))) : h('p', { class: 'empty' }, 'No 7+ matches yet. They appear here as the twice-daily fit checks score new jobs.'),
+      moreBtn('strong', rows.length, Math.min(rows.length, lim)));
+  }
+
+  // ---------- starred ----------
+  const SENT_KEY = 'jobdash-sent-v1';
+  let sentLocal = {}; try { sentLocal = JSON.parse(localStorage.getItem(SENT_KEY) || '{}'); } catch (e) { sentLocal = {}; }
+  const saveSent = () => { try { localStorage.setItem(SENT_KEY, JSON.stringify(sentLocal)); } catch (e) { /* per visit */ } };
+  const selected = new Set();
+  function jobIndex() {
+    const d = state.data, m = new Map();
+    d.scored_jobs.forEach((j) => m.set(j.key, j));
+    (d.waiting_jobs || []).forEach((j) => m.set(j.key, { ...(m.get(j.key) || {}), ...j }));
+    d.portal_jobs.forEach((j) => m.set(j.key, { ...(m.get(j.key) || {}), ...j }));
+    return m;
+  }
+  function sentAt(key) {
+    const r = (state.data.requests || []).find((x) => x.url === key && x.review);
+    const t = r ? r.review_requested_at : null;
+    const l = sentLocal[key] ? new Date(sentLocal[key]).toISOString() : null;
+    return [t, l].filter(Boolean).sort().pop() || null;
+  }
+  function titleFromUrl(u) { try { const last = new URL(u).pathname.split('/').filter(Boolean).pop() || ''; return decodeURIComponent(last.replace(/_[A-Za-z]*\d[\w-]*$/, '')).replace(/[-_]+/g, ' ').trim(); } catch (e) { return ''; } }
+  function starredJobs() {
+    const idx = jobIndex();
+    return [...saved].map((k) => idx.get(k) || { key: k, link: k, role: titleFromUrl(k) || 'Saved job', company: '', location: '', region: '', gone: true })
+      .map((j) => ({ ...j, sent: sentAt(j.key) }));
+  }
+  async function sendReview(list, btn, label) {
+    if (!list.length) return;
+    if (!state.data.scan_token) { toast('One-tap sending needs the scan token. Ask Claude to switch it on.'); return; }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    const items = list.map((x) => ({ url: x.link || x.key, title: x.role || x.title || '', company: x.company || '', location: x.location || '', region: REGIONS.some((r) => r.id === x.region) ? x.region : '', source: 'starred' }));
+    try {
+      await gh('/actions/workflows/requests.yml/dispatches', { method: 'POST', body: JSON.stringify({ ref: 'main', inputs: { payload: JSON.stringify({ kind: 'review', items }) } }) });
+      const now = Date.now(); list.forEach((x) => { sentLocal[x.key] = now; selected.delete(x.key); }); saveSent();
+      toast(`${items.length} job${items.length === 1 ? '' : 's'} sent to the Resume Review Desk queue`);
+      render();
+    } catch (err) { toast('Could not reach GitHub. Try again in a moment.'); btn.disabled = false; btn.textContent = label; }
+  }
+  function clearStars(keys, what) {
+    if (!keys.length) return;
+    if (what === 'all' && !confirm(`Remove all ${keys.length} stars? You can undo this for a few seconds.`)) return;
+    const backup = new Set(saved);
+    keys.forEach((k) => { saved.delete(k); selected.delete(k); }); store(SAVED_KEY, saved); render();
+    toast(`Removed ${keys.length} star${keys.length === 1 ? '' : 's'}`, { label: 'Undo', fn: () => { saved = backup; store(SAVED_KEY, saved); render(); toast('Stars restored'); } });
+  }
+  function viewStarred() {
+    const all = starredJobs();
+    [...selected].forEach((k) => { if (!saved.has(k)) selected.delete(k); });
+    const rows = all.filter((j) => j.gone || inRegion(j)).filter((j) => matchQ(j.role, j.company, j.location))
+      .sort((a, b) => (a.sent ? 1 : 0) - (b.sent ? 1 : 0) || (Number(b.score) || 0) - (Number(a.score) || 0));
+    const sentRows = all.filter((j) => j.sent), unsent = rows.filter((j) => !j.sent && !j.gone);
+    const pick = rows.filter((j) => selected.has(j.key));
+    const b1 = h('button', { class: 'btn', type: 'button', disabled: !pick.length, onclick: (e) => sendReview(pick, e.currentTarget, `Send selected (${pick.length})`) }, `Send selected (${pick.length})`);
+    const b2 = h('button', { class: 'btn quiet', type: 'button', disabled: !unsent.length, onclick: (e) => sendReview(unsent, e.currentTarget, `Send all not yet sent (${unsent.length})`) }, `Send all not yet sent (${unsent.length})`);
+    const allPicked = unsent.length && unsent.every((j) => selected.has(j.key));
+    const selAll = h('button', { class: 'btn quiet', type: 'button', disabled: !unsent.length, onclick: () => { if (allPicked) unsent.forEach((j) => selected.delete(j.key)); else unsent.forEach((j) => selected.add(j.key)); render(); } }, allPicked ? 'Clear selection' : 'Select all not yet sent');
+    const b3 = h('button', { class: 'btn quiet', type: 'button', disabled: !sentRows.length, onclick: () => clearStars(sentRows.map((j) => j.key), 'sent') }, `Clear sent (${sentRows.length})`);
+    const b4 = h('button', { class: 'btn danger', type: 'button', disabled: !saved.size, onclick: () => clearStars([...saved], 'all') }, 'Clear all stars');
+    return h('section', { class: 'panel' },
+      h('p', { class: 'sub' }, `${fmt(saved.size)} starred on this device${sentRows.length ? ` · ${fmt(sentRows.length)} already sent to the Review Desk` : ''}. Tick the ones you want reviewed and send them; the next review run picks them up.`),
+      h('div', { class: 'actbar', style: { marginBottom: '10px' } }, b1, b2, selAll, b3, b4),
+      rows.length ? h('div', { class: 'rows' }, rows.map((j) => h('div', { class: 'sel-row' },
+        h('input', { type: 'checkbox', 'aria-label': 'Select ' + j.role, checked: selected.has(j.key), disabled: !!j.gone, onchange: (e) => { e.target.checked ? selected.add(j.key) : selected.delete(j.key); render(); } }),
+        jobRow(j, { score: true, extra: (x) => (x.sent ? h('span', { class: 'sent-tag' }, 'Sent ' + day(x.sent)) : x.gone ? h('span', { class: 'fstate' }, 'No longer open') : null) }))))
+        : h('p', { class: 'empty' }, saved.size ? 'No starred jobs match this region or search.' : 'No starred jobs yet. Tap the star on any job to add it here.'));
+  }
+
+  // ---------- hidden ----------
+  function viewHidden() {
+    const idx = jobIndex();
+    const rows = [...hidden].map((k) => idx.get(k) || { key: k, link: k, role: titleFromUrl(k) || 'Hidden job', company: '', location: '', region: '' }).filter((j) => matchQ(j.role, j.company, j.location));
+    return h('section', { class: 'panel' },
+      h('p', { class: 'sub' }, 'Jobs you hid from the lists on this device. Show one again to bring it back.'),
+      rows.length ? [h('div', { class: 'actbar', style: { marginBottom: '8px' } }, h('button', { class: 'btn quiet', type: 'button', onclick: () => { const backup = new Set(hidden); hidden.clear(); store(HIDDEN_KEY, hidden); render(); toast('All hidden jobs shown again', { label: 'Undo', fn: () => { hidden = backup; store(HIDDEN_KEY, hidden); render(); } }); } }, `Show all ${fmt(rows.length)} again`)),
+        h('div', { class: 'rows' }, rows.map((j) => h('div', { class: 'sel-row', style: { gridTemplateColumns: 'minmax(0,1fr) auto' } }, jobRow(j), h('button', { class: 'btn quiet', type: 'button', style: { marginRight: '6px' }, onclick: () => { toggleHidden(j.key); render(); } }, 'Show again'))))]
+        : h('p', { class: 'empty' }, 'Nothing hidden.'));
+  }
+
+  // ---------- smaller pages ----------
+  function hiringPanel(n) {
+    const d = state.data;
     const byCo = {}; d.portal_jobs.filter(inRegion).forEach((j) => { (byCo[j.company] ||= { Gulf: 0, India: 0, Europe: 0, APAC: 0, Canada: 0, Other: 0, n: 0 }); byCo[j.company][RCOLOR[j.region] ? j.region : 'Other']++; byCo[j.company].n++; });
-    const top = Object.entries(byCo).sort((a, b) => b[1].n - a[1].n).slice(0, 10), max = top.length ? top[0][1].n : 1;
-    const hiring = h('section', { class: 'panel' },
-      h('h2', {}, 'Who is hiring most'),
+    const top = Object.entries(byCo).filter(([name]) => matchQ(name)).sort((a, b) => b[1].n - a[1].n).slice(0, n), max = top.length ? top[0][1].n : 1;
+    return h('section', { class: 'panel' },
       h('p', { class: 'sub' }, 'Open roles per company in the latest scan. Tap a company to see its roles.'),
       top.length ? h('div', { class: 'hbars' }, top.map(([name, c]) => h('button', { class: 'hbar', type: 'button', onclick: () => { state.q = ''; $('#q').value = ''; go('open', { company: name }); } },
         h('span', { class: 'nm' }, name), h('span', { class: 'tr', style: { width: (c.n / max * 100) + '%' } }, ['Gulf', 'India', 'Europe', 'APAC', 'Canada', 'Other'].filter((r) => c[r]).map((r) => h('span', { style: { width: (c[r] / c.n * 100) + '%', background: rc(r) } }))), h('span', { class: 'n' }, fmt(c.n)))))
         : h('p', { class: 'empty' }, 'No open roles in this region yet.'),
       h('div', { class: 'legend' }, REGIONS.map((r) => h('span', {}, h('span', { class: 'dot', style: { background: r.color } }), r.id)), h('span', {}, h('span', { class: 'dot', style: { background: 'var(--multi)' } }), 'Several locations')));
-    const savedJobs = d.portal_jobs.filter((j) => saved.has(j.key)).filter(inRegion);
-    const savedPanel = savedJobs.length ? h('section', { class: 'panel', style: { marginTop: '18px' } }, h('h2', {}, `Starred jobs (${savedJobs.length})`), h('p', { class: 'sub' }, 'Jobs you starred on this device. Send them to the Resume Review Desk, then tell Claude "run the review queue".'), h('div', { style: { margin: '8px 0' } }, h('button', { class: 'btn', type: 'button', onclick: async (ev) => { ev.target.disabled = true; ev.target.textContent = 'Sending…'; toast(`Sending ${savedJobs.length} job(s)…`); try { const items = savedJobs.map((x) => ({ url: x.link || '', title: x.title || '', company: x.company || '', location: x.location || '', region: REGIONS.some((r) => r.id === x.region) ? x.region : '', source: 'starred' })); await gh('/actions/workflows/requests.yml/dispatches', { method: 'POST', body: JSON.stringify({ ref: 'main', inputs: { payload: JSON.stringify({ kind: 'review', items }) } }) }); toast(`${items.length} starred job(s) sent to the Review Desk queue`); ev.target.textContent = 'Sent'; } catch (err) { toast('Could not reach GitHub. Try again in a moment.'); ev.target.disabled = false; ev.target.textContent = 'Send all starred to Review Desk'; } }}, 'Send all starred to Review Desk')), h('div', { class: 'rows' }, savedJobs.map((j) => h('div', {}, jobRow(j), h('button', { class: 'btn quiet', type: 'button', style: { margin: '2px 0 8px' }, onclick: async (ev) => { ev.target.disabled = true; if (await sendRequest(j, 'review', { source: 'starred' })) toast('Sent to the Review Desk queue'); } }, 'Send to Review Desk'))))) : null;
-    const pulse = h('div', { class: 'pulse' }, goalRing(), activity(), followUps());
-    return [pipe, regionRow, pulse, h('div', { class: 'cols' }, h('div', {}, newPanel, savedPanel), hiring)];
   }
+  const viewHiring = () => hiringPanel(40);
+  const viewFollowups = () => followUps(Infinity);
+  const viewActivity = () => h('div', { class: 'pulse' }, goalRing(), activity());
 
   function viewOpen() {
     const d = state.data, f = state.f;
@@ -763,7 +1056,6 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const sortSel = h('select', { 'aria-label': 'Sort', onchange: (e) => { f.sort = e.target.value; render(); } }, h('option', { value: '' }, 'Newest first'), h('option', { value: 'company' }, 'Company A to Z'), h('option', { value: 'role' }, 'Role A to Z')); sortSel.value = f.sort || '';
     const hiddenCount = d.portal_jobs.filter((j) => hidden.has(j.key)).length;
     return h('section', { class: 'panel' },
-      h('h2', {}, 'Open roles at your target companies'),
       h('p', { class: 'sub' }, 'Every role the latest scan found in your regions that matched your search terms. They are not scored, so use this to browse. Tap a role for details, star it to save it, or hide it.'),
       h('div', { class: 'controls' }, coSel, sortSel, chip('bancs', 'BaNCS companies'), chip('savedOnly', `Saved (${fmt(saved.size)})`), chip('oneCity', 'Hide "several locations"'), hiddenCount ? chip('showHidden', `Show hidden (${fmt(hiddenCount)})`) : null, h('span', { class: 'count' }, `${fmt(rows.length)} roles`)),
       rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => jobRow(j, { when: (x) => 'Seen ' + day(x.first_seen) }))) : h('p', { class: 'empty' }, 'No roles match these filters. Clear a filter or the search box to see more.'),
@@ -776,7 +1068,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const mode = f.appsView || 'board';
     const toggle = h('span', { class: 'viewtoggle', role: 'group', 'aria-label': 'View' }, ['board', 'list'].map((m) => h('button', { type: 'button', 'aria-pressed': String(mode === m), onclick: () => { f.appsView = m; render(); } }, m === 'board' ? 'Board' : 'List')));
     const head = h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' } },
-      h('div', {}, h('h2', {}, 'My applications'), h('p', { class: 'sub' }, mode === 'board' ? 'Every job in your trackers, by stage. Swipe sideways to see every stage. Tap a job for its details.' : 'Applied jobs, newest first. Tap a heading to sort, or a row for details.')), toggle);
+      h('div', {}, h('p', { class: 'sub' }, mode === 'board' ? 'Every job in your trackers, by stage. Swipe sideways to see every stage. Tap a job for its details.' : 'Applied jobs, newest first. Tap a heading to sort, or a row for details.')), toggle);
     if (mode === 'list') {
       const sort = f.appsSort || { k: 'applied_date', dir: -1 };
       const rows = all.filter(isApplied).map((j) => ({ ...j, waiting: daysSince(j.applied_date) }))
@@ -818,7 +1110,6 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const chip = (key, label) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(!!f[key]), onclick: () => { f[key] = !f[key]; render(); } }, label);
     const scanned = d.companies.filter((c) => c.scan_status === 'Scanned').length;
     return h('section', { class: 'panel' },
-      h('h2', {}, 'Your target companies'),
       h('p', { class: 'sub' }, `${fmt(scanned)} of ${fmt(d.companies.length)} are scanned automatically. Tap a company for its details and roles. To add or remove one, edit Target_Companies.md.`),
       h('div', { class: 'controls' }, sel('coStatus', 'Status', [['', 'All statuses'], ...statuses.map((s) => [s, s])]), sel('coPri', 'Priority', [['', 'All priorities'], ['P1', 'P1'], ['P2', 'P2'], ['P3', 'P3']]), sel('coSort', 'Sort', [['', 'Priority first'], ['roles', 'Most open roles'], ['name', 'Name A to Z']]), chip('coBancs', 'BaNCS only'), h('span', { class: 'count' }, `${fmt(rows.length)} companies`)),
       h('div', { class: 'rows' },
@@ -851,7 +1142,6 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const batchSel = h('select', { 'aria-label': 'Batch', onchange: (e) => { f.batch = e.target.value; render(); } }, Array.from({ length: total }, (_, i) => h('option', { value: String(i) }, `Batch ${i + 1} of ${total}: ${list.slice(i * BATCH, (i + 1) * BATCH).length} companies`))); batchSel.value = String(b);
     const copy = async () => { try { await navigator.clipboard.writeText(ta.value); toast('Prompt copied. Paste it into ChatGPT.'); } catch (e) { ta.focus(); ta.select(); toast('Text selected. Copy it with Ctrl+C, or long-press on a phone.'); } };
     return h('section', { class: 'panel' },
-      h('h2', {}, 'ChatGPT handoff'),
       h('p', { class: 'sub' }, `${fmt(list.length)} companies the scanner can't cover yet. Copy one batch into ChatGPT, then save its CSV in Career Portals\\ChatGPT Results on your laptop. The next sync checks every link before anything reaches your trackers.`),
       h('div', { class: 'controls' }, batchSel, h('button', { class: 'chip', type: 'button', 'aria-pressed': String(!!f.p1), onclick: () => { f.p1 = !f.p1; f.batch = 0; render(); } }, 'P1 only'), h('button', { class: 'btn', type: 'button', onclick: copy }, 'Copy prompt')),
       h('div', { class: 'rows', style: { marginBottom: '12px' } }, part.slice(0, 5).map((c) => h('button', { class: 'co-row', type: 'button', style: { gridTemplateColumns: 'minmax(0,1fr) auto' }, onclick: () => companyDrawer(c) }, h('span', { class: 'nm' }, c.company), h('span', { class: 'pill ' + coTone(c.scan_status) }, c.scan_status))),
@@ -859,12 +1149,17 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
       ta);
   }
 
+  let lastAnim = null;
   function render() {
     if (!state.data) return;
     chrome();
-    const views = { today: viewToday, open: viewOpen, apps: viewApps, companies: viewCompanies, chatgpt: viewChatGPT };
-    const out = views[state.tab]();
-    $('#view').replaceChildren(...[].concat(out));
+    const views = { home: viewHome, found: viewFound, open: viewOpen, strong: viewStrong, starred: viewStarred, hidden: viewHidden, apps: viewApps, followups: viewFollowups, activity: viewActivity, companies: viewCompanies, hiring: viewHiring, chatgpt: viewChatGPT };
+    if (!views[state.tab]) state.tab = 'home';
+    const pg = PAGES[state.tab];
+    const out = [].concat(views[state.tab]());
+    $('#view').replaceChildren(h('div', { class: 'page-head' }, h('h1', {}, pg.label), pg.desc ? h('p', {}, pg.desc) : null), ...out);
+    if (state.tab !== lastAnim) { lastAnim = state.tab; document.querySelectorAll('#view .rows').forEach((r) => { r.classList.add('anim'); [...r.children].slice(0, 24).forEach((c, i) => c.style.setProperty('--i', i)); }); }
+    document.title = pg.label + ' · Job Dashboard';
   }
 
 
@@ -995,7 +1290,6 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     if (!r.finished && !pollT) poll();
     return [body, foot];
   }
-  $('#run-scan').addEventListener('click', openScan);
 
 
   // ---------- fit checks and tracker adds (queued for Claude) ----------
@@ -1030,7 +1324,7 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
         f.tips ? h('div', {}, h('b', {}, 'If you apply: '), f.tips) : null,
         h('div', { class: 'ck-wait' }, `Checked ${when(f.checked_at)}`));
     }
-    if (r.fit === 'queued' || isRecent(loc.fit)) return h('div', { class: 'ck-wait' }, `Queued ${r.fit_requested_at ? when(r.fit_requested_at) : 'just now'}. Claude checks the queue every hour (8 am to 11 pm IST). ${SOONER}`);
+    if (r.fit === 'queued' || isRecent(loc.fit)) return h('div', { class: 'ck-wait' }, `Queued ${r.fit_requested_at ? when(r.fit_requested_at) : 'just now'}. Claude checks the queue twice a day (about 7:10 am and 5:10 pm IST). ${SOONER}`);
     if (r.fit === 'error') return h('div', { class: 'ck-wait' }, `The last check didn't finish: ${r.fit_error || 'unknown error'}.`);
     if (r.fit === 'needs_jd') return [h('div', { class: 'ck-wait' }, 'This site didn\'t let the scanner read the job description. Paste it here and Claude will check it.'), jdForm(e, 'fit')];
     return null;
@@ -1205,11 +1499,11 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
     const d = state.data; const last = (d.scan_meta[0] || {}).started;
     if (r.kind === 'url') {
       const sent = localReq[normUrl(r.u)];
-      if (sent && (isRecent(sent.fit) || isRecent(sent.track))) return [h('p', {}, h('strong', {}, 'Request sent.'), ` ${isRecent(sent.fit) ? 'Claude checks the queue every hour (8 am to 11 pm IST); the result appears here. ' + SOONER : ''}${isRecent(sent.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`)];
+      if (sent && (isRecent(sent.fit) || isRecent(sent.track))) return [h('p', {}, h('strong', {}, 'Request sent.'), ` ${isRecent(sent.fit) ? 'Claude checks the queue twice a day (about 7:10 am and 5:10 pm IST); the result appears here. ' + SOONER : ''}${isRecent(sent.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`)];
       const board = Object.keys(JOB_BOARDS).find((b) => r.host.includes(b));
       const portal = d.portal_hosts && Object.entries(d.portal_hosts).find(([hh]) => r.host === hh || r.host.endsWith('.' + hh) || hh.endsWith(r.host));
       const listed = d.companies.find((c) => { const cu = parseUrl(c.careers_url); return cu && (cu.hostname.replace(/^www\./, '') === r.host); });
-      const manual = () => { const e = { k: normUrl(r.u), link: r.u.href, host: r.host, title: '', company: '', location: '', region: '' }; const loc = localReq[e.k]; return loc && (isRecent(loc.fit) || isRecent(loc.track)) ? h('p', { class: 'ck-wait' }, `Request sent. ${isRecent(loc.fit) ? 'Claude checks the queue every hour (8 am to 11 pm IST). ' + SOONER : ''}${isRecent(loc.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`) : h('div', {}, h('p', { class: 'ck-hint', style: { marginTop: '4px' } }, 'Check it now: fill in the basics and paste the description.'), jdForm(e, 'both', { manual: true })); };
+      const manual = () => { const e = { k: normUrl(r.u), link: r.u.href, host: r.host, title: '', company: '', location: '', region: '' }; const loc = localReq[e.k]; return loc && (isRecent(loc.fit) || isRecent(loc.track)) ? h('p', { class: 'ck-wait' }, `Request sent. ${isRecent(loc.fit) ? 'Claude checks the queue twice a day (about 7:10 am and 5:10 pm IST). ' + SOONER : ''}${isRecent(loc.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`) : h('div', {}, h('p', { class: 'ck-hint', style: { marginTop: '4px' } }, 'Check it now: fill in the basics and paste the description.'), jdForm(e, 'both', { manual: true })); };
       if (board) return [h('p', {}, h('strong', {}, `Not checked yet.`), ` The scanner reads company career portals, not ${JOB_BOARDS[board]}, and this job isn't in your trackers. Tip: search the title and company too, in case it's there without a link.`), manual()];
       if (portal) {
         const [, co] = portal; const c = d.companies.find((x) => x.id === co.id);
@@ -1242,20 +1536,22 @@ footer { margin-top: 28px; display: flex; flex-wrap: wrap; justify-content: spac
         h('div', { class: 'body' }, h('div', { class: 'ck-input' }, input), results)));
     showResults(); input.focus(); input.select();
   }
-  $('#check-job').addEventListener('click', () => openCheck());
 
 
   // ---------- inputs ----------
   let qt = null;
   $('#q').addEventListener('paste', (e) => { const t = (e.clipboardData || window.clipboardData).getData('text'); if (parseUrl(t)) { e.preventDefault(); openCheck(t.trim()); } });
-  $('#q').addEventListener('input', (e) => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.limit = {}; if (state.tab === 'today' && state.q) state.tab = 'open'; render(); }, 160); });
+  $('#q').addEventListener('input', (e) => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.limit = {}; if (state.tab === 'home' && state.q) { state.tab = 'open'; history.replaceState(null, '', '#open'); } render(); }, 160); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && $('#modal-root').firstChild) { closeModal(); return; }
     if (e.key === 'Escape' && $('#drawer-root').firstChild) { closeDrawer(); return; }
+    if (e.key === 'Escape' && $('#app').classList.contains('nav-open')) { closeNav(); return; }
     if (e.key === '/' && state.data && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) { e.preventDefault(); $('#q').focus(); }
   });
-  const hash = location.hash.slice(1); if (TABS.some((t) => t.id === hash)) state.tab = hash;
-  setInterval(() => { if (state.data && state.tab === 'today' && !$('#drawer-root').firstChild) document.querySelectorAll('.rcard-head span').forEach((s, i) => { s.textContent = `${REGIONS[i].city} ${clock(REGIONS[i].tz)}`; }); }, 30000);
+  const fromHash = () => { const k = location.hash.slice(1); const t = ALIAS[k] || k; return PAGES[t] && !PAGES[t].action ? t : null; };
+  state.tab = fromHash() || 'home';
+  window.addEventListener('hashchange', () => { const t = fromHash(); if (t && t !== state.tab && state.data) go(t); });
+  setInterval(() => { if (state.data && state.tab === 'home' && !$('#drawer-root').firstChild) document.querySelectorAll('.rcard-head span').forEach((s, i) => { s.textContent = `${REGIONS[i].city} ${clock(REGIONS[i].tz)}`; }); }, 30000);
   tryStored();
 })();
 </script>
