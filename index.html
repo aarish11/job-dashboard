@@ -870,7 +870,7 @@ body { background: var(--paper); }
     const topPanel = h('section', { class: 'panel' },
       h('h2', {}, 'Best new matches this week'),
       h('p', { class: 'sub' }, 'Scored jobs first seen in the last 7 days, best match on top.'),
-      best.length ? h('div', { class: 'rows' }, best.map((j) => jobRow(j, { score: true, when: foundWhen('7d') }))) : h('p', { class: 'empty' }, 'No scored jobs from the last 7 days yet. They appear after the twice-daily fit checks.'),
+      best.length ? h('div', { class: 'rows' }, best.map((j) => jobRow(j, { score: true, when: foundWhen('7d') }))) : h('p', { class: 'empty' }, 'No scored jobs from the last 7 days yet. They appear after you run Job fit checks.'),
       h('div', { class: 'actbar', style: { marginTop: '12px' } }, h('button', { class: 'btn', type: 'button', onclick: () => go('found', { range: 'today' }) }, 'See everything found today'), h('button', { class: 'btn quiet', type: 'button', onclick: () => go('strong') }, 'All strong matches')));
     return [pipe, regionRow, h('div', { class: 'cols' }, topPanel, followUps(5))];
   }
@@ -932,7 +932,7 @@ body { background: var(--paper); }
         rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => jobRow(j, { score: true, extra: fstateTag, when: foundWhen(range) })))
           : h('p', { class: 'empty' }, range === 'today' ? `Nothing new found today yet${state.region !== 'All' ? ' in ' + state.region : ''}. The next automatic scan is ${nextScan()}. Try Yesterday or Last 7 days.` : 'No roles match. Try a wider date range or clear the search box.'),
         moreBtn('found', rows.length, Math.min(rows.length, lim)),
-        h('p', { class: 'sub', style: { marginTop: '12px' } }, 'Scored jobs come first, best match on top. "Not shortlisted" means the scanner\'s free title filter didn\'t pick it for scoring. To score one anyway, open it and choose Check fit / track: it moves to "Queued for scoring" and gets scored at the next fit-check run.')),
+        h('p', { class: 'sub', style: { marginTop: '12px' } }, 'Scored jobs come first, best match on top. "Not shortlisted" means the scanner\'s free title filter didn\'t pick it for scoring. To score one anyway, open it and choose Check fit / track: it moves to "Queued for scoring" and gets scored the next time you run Job fit checks.')),
     ];
   }
 
@@ -944,7 +944,7 @@ body { background: var(--paper); }
     return h('section', { class: 'panel' },
       h('p', { class: 'sub' }, `${fmt(all.length)} jobs scored so far. How they scored, 1 to 10:`),
       scoreHist(all),
-      rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => jobRow(j, { score: true, when: (x) => (x.scored_at ? 'Scored ' + day(x.scored_at) : null) }))) : h('p', { class: 'empty' }, 'No 7+ matches yet. They appear here as the twice-daily fit checks score new jobs.'),
+      rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => jobRow(j, { score: true, when: (x) => (x.scored_at ? 'Scored ' + day(x.scored_at) : null) }))) : h('p', { class: 'empty' }, 'No 7+ matches yet. They appear here after you run Job fit checks.'),
       moreBtn('strong', rows.length, Math.min(rows.length, lim)));
   }
 
@@ -1298,7 +1298,7 @@ body { background: var(--paper); }
   let localReq = {}; try { localReq = JSON.parse(localStorage.getItem(REQ_KEY) || '{}'); } catch (e) { localReq = {}; }
   const saveLocalReq = () => { try { localStorage.setItem(REQ_KEY, JSON.stringify(localReq)); } catch (e) { /* per visit */ } };
   const NEEDS_PASTE = /(indeed|linkedin|naukri|glassdoor|bayt|gulftalent|foundit|monster)\./i;
-  const SOONER = 'Need it sooner? In the Claude app, open the scheduled task "Job fit checks" and run it now.';
+  const SOONER = '';
   async function sendRequest(e, kind, extra = {}) {
     const d = state.data;
     if (!d.scan_token) { toast('One-tap requests need the scan token. Ask Claude to switch it on.'); return false; }
@@ -1325,7 +1325,7 @@ body { background: var(--paper); }
         f.tips ? h('div', {}, h('b', {}, 'If you apply: '), f.tips) : null,
         h('div', { class: 'ck-wait' }, `Checked ${when(f.checked_at)}`));
     }
-    if (r.fit === 'queued' || isRecent(loc.fit)) return h('div', { class: 'ck-wait' }, `Queued ${r.fit_requested_at ? when(r.fit_requested_at) : 'just now'}. Claude checks the queue twice a day (about 7:10 am and 5:10 pm IST). ${SOONER}`);
+    if (r.fit === 'queued' || isRecent(loc.fit)) return h('div', { class: 'ck-wait' }, `Queued ${r.fit_requested_at ? when(r.fit_requested_at) : 'just now'}. It will be scored the next time you ask Claude to run Job fit checks. ${SOONER}`);
     if (r.fit === 'error') return h('div', { class: 'ck-wait' }, `The last check didn't finish: ${r.fit_error || 'unknown error'}.`);
     if (r.fit === 'needs_jd') return [h('div', { class: 'ck-wait' }, 'This site didn\'t let the scanner read the job description. Paste it here and Claude will check it.'), jdForm(e, 'fit')];
     return null;
@@ -1500,11 +1500,11 @@ body { background: var(--paper); }
     const d = state.data; const last = (d.scan_meta[0] || {}).started;
     if (r.kind === 'url') {
       const sent = localReq[normUrl(r.u)];
-      if (sent && (isRecent(sent.fit) || isRecent(sent.track))) return [h('p', {}, h('strong', {}, 'Request sent.'), ` ${isRecent(sent.fit) ? 'Claude checks the queue twice a day (about 7:10 am and 5:10 pm IST); the result appears here. ' + SOONER : ''}${isRecent(sent.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`)];
+      if (sent && (isRecent(sent.fit) || isRecent(sent.track))) return [h('p', {}, h('strong', {}, 'Request sent.'), ` ${isRecent(sent.fit) ? 'It will be scored the next time you ask Claude to run Job fit checks; the result appears here. ' + SOONER : ''}${isRecent(sent.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`)];
       const board = Object.keys(JOB_BOARDS).find((b) => r.host.includes(b));
       const portal = d.portal_hosts && Object.entries(d.portal_hosts).find(([hh]) => r.host === hh || r.host.endsWith('.' + hh) || hh.endsWith(r.host));
       const listed = d.companies.find((c) => { const cu = parseUrl(c.careers_url); return cu && (cu.hostname.replace(/^www\./, '') === r.host); });
-      const manual = () => { const e = { k: normUrl(r.u), link: r.u.href, host: r.host, title: '', company: '', location: '', region: '' }; const loc = localReq[e.k]; return loc && (isRecent(loc.fit) || isRecent(loc.track)) ? h('p', { class: 'ck-wait' }, `Request sent. ${isRecent(loc.fit) ? 'Claude checks the queue twice a day (about 7:10 am and 5:10 pm IST). ' + SOONER : ''}${isRecent(loc.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`) : h('div', {}, h('p', { class: 'ck-hint', style: { marginTop: '4px' } }, 'Check it now: fill in the basics and paste the description.'), jdForm(e, 'both', { manual: true })); };
+      const manual = () => { const e = { k: normUrl(r.u), link: r.u.href, host: r.host, title: '', company: '', location: '', region: '' }; const loc = localReq[e.k]; return loc && (isRecent(loc.fit) || isRecent(loc.track)) ? h('p', { class: 'ck-wait' }, `Request sent. ${isRecent(loc.fit) ? 'It will be scored the next time you ask Claude to run Job fit checks. ' + SOONER : ''}${isRecent(loc.track) ? ' It goes into your tracker at the next laptop sync.' : ''}`) : h('div', {}, h('p', { class: 'ck-hint', style: { marginTop: '4px' } }, 'Check it now: fill in the basics and paste the description.'), jdForm(e, 'both', { manual: true })); };
       if (board) return [h('p', {}, h('strong', {}, `Not checked yet.`), ` The scanner reads company career portals, not ${JOB_BOARDS[board]}, and this job isn't in your trackers. Tip: search the title and company too, in case it's there without a link.`), manual()];
       if (portal) {
         const [, co] = portal; const c = d.companies.find((x) => x.id === co.id);
