@@ -954,7 +954,7 @@ body { background: var(--paper); }
       const s = scoredBy.get(j.key), r = reqBy.get(j.key);
       const extra = s ? { score: s.score, why: s.why, confidence: s.confidence, eligibility: s.eligibility, gaps: s.gaps, verdict: s.verdict, scored_at: s.scored_at } : {};
       const u = parseUrl(j.link || j.key), loc = u ? localReq[normUrl(u)] : null;
-      return { ...j, ...extra, seenDay: istDay(j.seen), fitState: s && s.score != null ? 'scored' : (r && r.fit === 'queued') || (loc && isRecent(loc.fit)) ? 'queued' : 'not' };
+      return { ...j, ...extra, seenDay: istDay(j.seen), fitState: s && s.score != null ? 'scored' : (r && r.fit === 'queued') || (loc && isRecent(loc.fit)) || j.picked ? 'queued' : 'not' };
     });
     return foundCache;
   }
@@ -967,8 +967,8 @@ body { background: var(--paper); }
     const w = new Date(t); w.setDate(t.getDate() - 6); return dd >= ymd(w);
   }
   const FSTATE_ORDER = { scored: 0, queued: 1, not: 2 };
-  const bestFirst = (a, b) => (FSTATE_ORDER[a.fitState] - FSTATE_ORDER[b.fitState]) || ((Number(b.score) || 0) - (Number(a.score) || 0)) || String(b.seen || '').localeCompare(String(a.seen || ''));
-  const fstateTag = (j) => (j.fitState === 'queued' ? h('span', { class: 'fstate q' }, 'Queued for scoring') : j.fitState === 'not' ? h('span', { class: 'fstate' }, 'Not shortlisted') : null);
+  const bestFirst = (a, b) => (FSTATE_ORDER[a.fitState] - FSTATE_ORDER[b.fitState]) || ((b.picked ? 1 : 0) - (a.picked ? 1 : 0)) || ((Number(b.score) || 0) - (Number(a.score) || 0)) || String(b.seen || '').localeCompare(String(a.seen || ''));
+  const fstateTag = (j) => (j.picked && j.fitState !== 'scored' ? h('span', { class: 'fstate q' }, 'Found by Claude · not scored yet') : j.fitState === 'queued' ? h('span', { class: 'fstate q' }, 'Queued for scoring') : j.fitState === 'not' ? h('span', { class: 'fstate' }, 'Not shortlisted') : null);
   const foundWhen = (range) => (j) => (range === 'today' || range === 'yesterday') && istTime(j.seen) ? 'Found ' + istTime(j.seen) : 'Found ' + day(j.seenDay);
   function viewFound() {
     const f = state.f, range = f.range || 'today';
