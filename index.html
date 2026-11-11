@@ -416,6 +416,15 @@ body { background: var(--paper); }
 .score.s5 { background: var(--primary-soft); color: var(--ink); }
 .fstate { font-size: .76rem; color: var(--muted); white-space: nowrap; }
 .fstate.q { color: var(--primary); font-weight: 600; }
+.ctx { position: fixed; z-index: 70; min-width: 190px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 5px; display: grid; }
+.ctx button { border: 0; background: none; text-align: left; padding: 8px 12px; border-radius: 8px; font: inherit; font-size: .9rem; color: var(--ink); cursor: pointer; }
+.ctx button:hover, .ctx button:focus-visible { background: var(--sunk); outline: none; }
+.ctx button.main { font-weight: 700; color: var(--primary); }
+.ctx hr { border: 0; border-top: 1px solid var(--line); margin: 4px 2px; }
+.applied-tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; background: var(--ok, #16a34a); color: #fff; white-space: nowrap; margin-left: 6px; font-weight: 600; vertical-align: 1px; }
+.goal { display: flex; align-items: center; gap: 10px; margin: 2px 0 12px; font-size: .92rem; }
+.goal .tr { flex: 1; max-width: 260px; height: 8px; border-radius: 4px; background: var(--sunk); overflow: hidden; }
+.goal .tr span { display: block; height: 100%; background: var(--primary); border-radius: 4px; }
 .sent-tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--primary); color: var(--primary); white-space: nowrap; margin-left: 6px; font-weight: 600; vertical-align: 1px; }
 .row { transition: background .18s ease, box-shadow .18s ease; }
 .row:hover { background: var(--row-hover); box-shadow: inset 3px 0 0 var(--nav-edge); }
@@ -527,7 +536,8 @@ body { background: var(--paper); }
       { id: 'open', label: 'All open roles', desc: 'Every open role at your target companies, in your regions.' },
       { id: 'strong', label: 'Strong matches (7+)', desc: 'Jobs scored 7 or more against your resume, best match on top.' },
       { id: 'starred', label: 'Starred', desc: 'Your starred jobs. Send them to the Resume Review Desk, or clear them to start a fresh batch.' },
-      { id: 'hidden', label: 'Hidden', desc: 'Jobs you hid from the lists.' }] },
+      { id: 'hidden', label: 'Hidden', desc: 'Jobs you hid from the lists.' },
+      { id: 'applied', label: 'Applied', desc: 'Jobs you have applied for. Right-click any job (or long-press on a phone) and choose Applied to move it here.' }] },
     { grp: 'Applications', items: [
       { id: 'apps', label: 'Pipeline', desc: 'Every job in your trackers, by stage.' },
       { id: 'followups', label: 'Follow-ups due', desc: 'Applications with no reply after a week or more.' },
@@ -546,6 +556,8 @@ body { background: var(--paper); }
   let navClosed = new Set(); try { navClosed = new Set(JSON.parse(localStorage.getItem(NAV_KEY) || '[]')); } catch (e) { navClosed = new Set(); }
   const state = { tab: 'home', region: 'All', q: '', data: null, f: {}, limit: {}, played: false };
   let saved = new Set(), hidden = new Set();
+  const APPLIED_KEY = 'jobdash-applied-v1', DAILY_GOAL = 10;
+  let appliedLocal = {}, appliedCache = null;
 
   // ---------- small helpers ----------
   const $ = (s, el = document) => el.querySelector(s);
@@ -590,7 +602,8 @@ body { background: var(--paper); }
     let bytes = plain;
     if (p.z === 'gzip') bytes = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
     state.data = JSON.parse(new TextDecoder().decode(bytes));
-    saved = load(SAVED_KEY); hidden = load(HIDDEN_KEY); foundCache = null;
+    saved = load(SAVED_KEY); hidden = load(HIDDEN_KEY); foundCache = null; appliedCache = null;
+    try { appliedLocal = JSON.parse(localStorage.getItem(APPLIED_KEY) || '{}') || {}; } catch (e) { appliedLocal = {}; }
     $('#login').hidden = true; $('#app').hidden = false;
     render();
   }
@@ -634,7 +647,7 @@ body { background: var(--paper); }
     $('#crumb').replaceChildren(...(pg.grp ? [pg.grp, ' › '] : []), h('b', {}, pg.label));
     const d = state.data, m = d.scan_meta && d.scan_meta[0];
     $('#scan-line').textContent = m ? `Last scan ${when(m.started)}. Next ${nextScan()}` : '';
-    $('#gen-line').textContent = `Site updated ${when(d.generated)}. Stars and hidden jobs are remembered on this device only.`;
+    $('#gen-line').textContent = `Site updated ${when(d.generated)}. Stars, hidden and applied marks are remembered on this device only.`;
   }
   const closeNav = () => { $('#app').classList.remove('nav-open'); $('#burger').setAttribute('aria-expanded', 'false'); };
   $('#burger').addEventListener('click', () => { const o = $('#app').classList.toggle('nav-open'); $('#burger').setAttribute('aria-expanded', String(o)); });
@@ -649,8 +662,8 @@ body { background: var(--paper); }
   }
   function navCounts() {
     const d = state.data;
-    return { found: foundAll().filter(inRegion).filter((j) => inRange(j, 'today')).length, open: d.portal_jobs.filter(inRegion).length,
-      strong: d.scored_jobs.filter(inRegion).filter((j) => Number(j.score) >= 7).length, starred: saved.size, hidden: hidden.size || null,
+    return { found: foundAll().filter(inRegion).filter((j) => inRange(j, 'today')).filter((j) => !isMarked(j)).length, open: d.portal_jobs.filter(inRegion).length,
+      strong: d.scored_jobs.filter(inRegion).filter((j) => Number(j.score) >= 7).length, starred: saved.size, hidden: hidden.size || null, applied: appliedMap().size || null,
       apps: (d.trackers || []).filter(inRegion).length, followups: fuRows().length, companies: d.companies.filter(inRegion).length,
       chatgpt: d.companies.filter((c) => c.scan_status !== 'Scanned').filter(inRegion).length };
   }
@@ -682,11 +695,59 @@ body { background: var(--paper); }
   }
   function toggleSaved(key) { if (saved.has(key)) { saved.delete(key); toast('Removed from saved'); } else { saved.add(key); toast('Saved'); } store(SAVED_KEY, saved); render(); }
   function toggleHidden(key) { if (hidden.has(key)) { hidden.delete(key); toast('Job shown again'); } else { hidden.add(key); toast('Job hidden'); } store(HIDDEN_KEY, hidden); }
+  // ---------- applied ----------
+  const akey = (j) => j.link || j.key;
+  function appliedMap() {
+    if (appliedCache) return appliedCache;
+    const d = state.data, m = new Map();
+    Object.entries(appliedLocal).forEach(([k, v]) => { if (v && !v.off) m.set(k, { ...v, key: v.key || k, link: v.link || k, mine: true }); });
+    const known = (k, v) => { if (!k || m.has(k) || (appliedLocal[k] && appliedLocal[k].off)) return; m.set(k, v); };
+    (d.trackers || []).filter((t) => t.applied_date || /^Applied/.test(t.status || '')).forEach((t) => known(t.link || t.key, { key: t.key, link: t.link, role: t.role, company: t.company, location: t.location, region: t.region, at: t.applied_date || '', status: t.status }));
+    (d.applied_known || []).forEach((t) => known(t.link || t.key, { key: t.link || t.key, link: t.link, role: t.role, company: t.company, location: t.location, region: t.region, at: t.applied_at || '', status: 'Applied' }));
+    return (appliedCache = m);
+  }
+  const appliedKeyOf = (j) => { const m = appliedMap(); return [akey(j), j.key, j.link].find((k) => k && m.has(k)) || null; };
+  const isMarked = (j) => !!appliedKeyOf(j);
+  function markApplied(j) {
+    const k = akey(j); if (!k) return;
+    appliedLocal[k] = { at: new Date().toISOString(), key: j.key, link: j.link || j.key, role: j.role || j.title || '', company: j.company || '', location: j.location || '', region: j.region || '' };
+    try { localStorage.setItem(APPLIED_KEY, JSON.stringify(appliedLocal)); } catch (e) { /* per visit */ }
+    appliedCache = null; render();
+    const n = appliedToday();
+    toast(`Moved to Applied · ${n} of ${DAILY_GOAL} today`, { label: 'Undo', fn: () => unmarkApplied(k, true) });
+  }
+  function unmarkApplied(k, quiet) {
+    if (!k) return;
+    delete appliedLocal[k]; appliedCache = null;
+    if (appliedMap().has(k)) appliedLocal[k] = { off: true }; // listed in your trackers or the Review Desk: hide it here
+    try { localStorage.setItem(APPLIED_KEY, JSON.stringify(appliedLocal)); } catch (e) { /* per visit */ }
+    appliedCache = null; render(); if (!quiet) toast('Removed from Applied');
+  }
+  const appliedToday = () => { const t = ymd(todayIST()); return [...appliedMap().values()].filter((v) => istDay(v.at) === t).length; };
+  function closeCtx() { document.querySelectorAll('.ctx').forEach((m) => m.remove()); document.removeEventListener('click', closeCtx, true); window.removeEventListener('scroll', closeCtx, true); document.removeEventListener('keydown', ctxKey, true); }
+  const ctxKey = (e) => { if (e.key === 'Escape') closeCtx(); };
+  function ctxMenu(e, j) {
+    e.preventDefault(); e.stopPropagation(); closeCtx();
+    const k = j.key, on = isMarked(j), link = safe(j.link || j.key);
+    const it = (label, fn, cls) => h('button', { type: 'button', role: 'menuitem', class: cls || null, onclick: (ev) => { ev.stopPropagation(); closeCtx(); fn(); } }, label);
+    const m = h('div', { class: 'ctx', role: 'menu', 'aria-label': 'Job actions' },
+      on ? it('Remove from Applied', () => unmarkApplied(appliedKeyOf(j))) : it('✓  Applied', () => markApplied(j), 'main'),
+      h('hr'),
+      k ? it(saved.has(k) ? 'Remove star' : 'Star', () => toggleSaved(k)) : null,
+      k ? it(hidden.has(k) ? 'Show again' : 'Hide', () => { toggleHidden(k); render(); }) : null,
+      link ? it('Open posting', () => window.open(link, '_blank', 'noopener')) : null,
+      it('Details', () => jobDrawer(j)));
+    document.body.append(m);
+    const x = Math.min(e.clientX, window.innerWidth - m.offsetWidth - 8), y = Math.min(e.clientY, window.innerHeight - m.offsetHeight - 8);
+    m.style.left = Math.max(8, x) + 'px'; m.style.top = Math.max(8, y) + 'px';
+    m.querySelector('button').focus();
+    setTimeout(() => { document.addEventListener('click', closeCtx, true); window.addEventListener('scroll', closeCtx, true); document.addEventListener('keydown', ctxKey, true); }, 0);
+  }
   function jobRow(j, opts = {}) {
-    return h('button', { class: 'row', type: 'button', onclick: () => jobDrawer(j, opts) },
+    return h('button', { class: 'row', type: 'button', onclick: () => jobDrawer(j, opts), oncontextmenu: (e) => ctxMenu(e, j) },
       h('span', { class: 'bar', style: { background: rc(j.region) } }),
       h('span', { style: { minWidth: 0 } }, h('div', { class: 't' }, j.role), h('div', { class: 'm' }, [j.company, j.location].filter(Boolean).join(', '))),
-      h('span', { class: 'r' }, opts.extra ? opts.extra(j) : null, opts.score && j.score != null ? h('span', { class: 'score num ' + scoreCls(j.score) }, j.score) : null, opts.when ? h('span', { class: 'when' }, opts.when(j)) : null, j.key ? starBtn(j.key) : null));
+      h('span', { class: 'r' }, !opts.noApplied && isMarked(j) ? h('span', { class: 'applied-tag' }, 'Applied') : null, opts.extra ? opts.extra(j) : null, opts.score && j.score != null ? h('span', { class: 'score num ' + scoreCls(j.score) }, j.score) : null, opts.when ? h('span', { class: 'when' }, opts.when(j)) : null, j.key ? starBtn(j.key) : null));
   }
   const moreBtn = (key, total, shown) => (shown < total ? h('div', { class: 'more' }, h('button', { class: 'btn quiet', type: 'button', onclick: () => { state.limit[key] = shown + 60; render(); } }, `Show ${fmt(Math.min(60, total - shown))} more of ${fmt(total - shown)}`)) : null);
 
@@ -735,6 +796,7 @@ body { background: var(--paper); }
        link && !isTracked ? h('button', { class: 'btn quiet', type: 'button', onclick: () => { closeDrawer(); openCheck(link); } }, 'Check fit / track') : null,
        j.key && !isTracked ? h('button', { class: 'btn quiet' + (saved.has(j.key) ? ' on' : ''), type: 'button', onclick: () => { toggleSaved(j.key); jobDrawer(j, opts); } }, saved.has(j.key) ? 'Saved' : 'Save') : null,
        j.key && !isTracked ? h('button', { class: 'btn quiet', type: 'button', onclick: () => { toggleHidden(j.key); closeDrawer(); render(); } }, hidden.has(j.key) ? 'Show again' : 'Hide') : null,
+       (j.key || j.link) ? h('button', { class: 'btn quiet' + (isMarked(j) ? ' on' : ''), type: 'button', onclick: () => { if (isMarked(j)) unmarkApplied(appliedKeyOf(j)); else markApplied(j); closeDrawer(); } }, isMarked(j) ? 'Applied ✓ (undo)' : 'Mark as applied') : null,
        link ? h('button', { class: 'btn quiet', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch (e) { toast('Copy did not work here: long-press the Open posting button instead'); } } }, 'Copy link') : null]);
   }
   function companyDrawer(c) {
@@ -779,7 +841,7 @@ body { background: var(--paper); }
   function goalRing() {
     const tr = (state.data.trackers || []).filter(inRegion);
     const t = todayIST(); const dow = (t.getDay() + 6) % 7; const mon = new Date(t); mon.setDate(t.getDate() - dow); const monIso = ymd(mon);
-    const n = tr.filter((j) => isApplied(j) && j.applied_date >= monIso).length;
+    const n = tr.filter((j) => isMarked(j) && j.applied_date >= monIso).length;
     const pct = Math.min(1, n / Math.max(1, goal)); const R = 52, C = 2 * Math.PI * R;
     const ring = h('span', { html: `<svg viewBox="0 0 132 132" aria-hidden="true"><circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--line)" stroke-width="12"/><circle cx="66" cy="66" r="${R}" fill="none" stroke="${n >= goal ? 'var(--ok)' : 'var(--primary)'}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C * pct} ${C}" transform="rotate(-90 66 66)"/></svg>`, style: { position: 'relative', display: 'grid', placeItems: 'center' } });
     const label = h('span', { style: { position: 'absolute', display: 'grid', justifyItems: 'center' } }, h('span', { class: 'ring-num' }, fmt(n)), h('span', { class: 'ring-sub' }, `of ${goal}`));
@@ -795,7 +857,7 @@ body { background: var(--paper); }
   function activity() {
     const d = state.data; const tr = (d.trackers || []).filter(inRegion);
     const applied = {}, found = {};
-    tr.forEach((j) => { if (isApplied(j)) (applied[j.applied_date] ||= []).push(j); });
+    tr.forEach((j) => { if (isMarked(j)) (applied[j.applied_date] ||= []).push(j); });
     d.scored_jobs.filter(inRegion).forEach((j) => { const k = j.scored_at || ''; if (k) (found[k] ||= []).push(j); });
     const t = todayIST(); const dow = (t.getDay() + 6) % 7; const start = new Date(t); start.setDate(t.getDate() - dow - 7 * 11);
     const W = 12, cell = 15, gap = 4, left = 26, top = 16;
@@ -818,7 +880,7 @@ body { background: var(--paper); }
       svgEl.append(rc2);
     });
     const total = tr.filter(isApplied).length;
-    const last30 = tr.filter((j) => isApplied(j) && daysSince(j.applied_date) <= 30).length;
+    const last30 = tr.filter((j) => isMarked(j) && daysSince(j.applied_date) <= 30).length;
     const activeDays = Object.keys(applied).length;
     let streak = 0; for (let i = 0; i < 90; i++) { const x = new Date(t); x.setDate(t.getDate() - i); if (applied[ymd(x)]) streak++; else if (i > 0) break; }
     return h('section', { class: 'panel heat' },
@@ -910,7 +972,7 @@ body { background: var(--paper); }
   const foundWhen = (range) => (j) => (range === 'today' || range === 'yesterday') && istTime(j.seen) ? 'Found ' + istTime(j.seen) : 'Found ' + day(j.seenDay);
   function viewFound() {
     const f = state.f, range = f.range || 'today';
-    const base = foundAll().filter(inRegion).filter((j) => inRange(j, range)).filter((j) => matchQ(j.role, j.company, j.location));
+    const base = foundAll().filter(inRegion).filter((j) => inRange(j, range)).filter((j) => !isMarked(j)).filter((j) => matchQ(j.role, j.company, j.location));
     const n = { scored: base.filter((j) => j.fitState === 'scored'), queued: base.filter((j) => j.fitState === 'queued'), not: base.filter((j) => j.fitState === 'not') };
     const strong = n.scored.filter((j) => Number(j.score) >= 7).length;
     const sort = f.fsort || '';
@@ -939,7 +1001,7 @@ body { background: var(--paper); }
   // ---------- strong matches ----------
   function viewStrong() {
     const all = state.data.scored_jobs.filter(inRegion).filter((j) => matchQ(j.role, j.company, j.location));
-    const rows = byScore(all.filter((j) => Number(j.score) >= 7));
+    const rows = byScore(all.filter((j) => Number(j.score) >= 7).filter((j) => !isMarked(j)));
     const lim = state.limit.strong || 60;
     return h('section', { class: 'panel' },
       h('p', { class: 'sub' }, `${fmt(all.length)} jobs scored so far. How they scored, 1 to 10:`),
@@ -1024,6 +1086,29 @@ body { background: var(--paper); }
         : h('p', { class: 'empty' }, 'Nothing hidden.'));
   }
 
+  // ---------- applied page ----------
+  const ARANGES = [['today', 'Today'], ['yesterday', 'Yesterday'], ['7d', 'Last 7 days'], ['any', 'All']];
+  function viewApplied() {
+    const f = state.f, range = f.arange || 'today';
+    const all = [...appliedMap().entries()].map(([k, v]) => ({ ...v, akey: k, seenDay: istDay(v.at) }))
+      .filter((j) => state.region === 'All' || j.region === state.region || (state.region === 'Europe' && /ireland|europe/i.test(j.region || '')))
+      .filter((j) => matchQ(j.role, j.company, j.location));
+    const inR = (r) => all.filter((j) => inRange(j, r));
+    const rows = inR(range).sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')) || (a.company || '').localeCompare(b.company || ''));
+    const n = appliedToday(), pct = Math.min(100, n / DAILY_GOAL * 100);
+    const lim = state.limit.applied || 60;
+    return h('section', { class: 'panel' },
+      h('div', { class: 'goal' }, h('b', {}, `${n} of ${DAILY_GOAL} applied today`), h('span', { class: 'tr' }, h('span', { style: { width: pct + '%' } })), n >= DAILY_GOAL ? h('span', { class: 'applied-tag' }, 'Daily target done') : null),
+      h('div', { class: 'controls' }, ARANGES.map(([k, l]) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(range === k), onclick: () => { f.arange = k; state.limit = {}; render(); } }, `${l} (${fmt(inR(k).length)})`)),
+        h('span', { class: 'count' }, `${fmt(rows.length)} job${rows.length === 1 ? '' : 's'}`)),
+      rows.length ? h('div', { class: 'rows' }, rows.slice(0, lim).map((j) => h('div', { class: 'sel-row', style: { gridTemplateColumns: 'minmax(0,1fr) auto' } },
+        jobRow(j, { noApplied: true, extra: (x) => (x.status && x.status !== 'Applied' ? h('span', { class: 'pill ' + statusTone(x.status) }, x.status) : null), when: (x) => 'Applied ' + (istTime(x.at) ? istTime(x.at) + ', ' : '') + day(x.seenDay) }),
+        h('button', { class: 'btn quiet', type: 'button', style: { marginRight: '6px' }, onclick: () => unmarkApplied(j.akey) }, 'Remove'))))
+        : h('p', { class: 'empty' }, range === 'today' ? 'Nothing marked applied today yet. Right-click a job in any list (or long-press on a phone) and choose Applied.' : 'No applied jobs in this range.'),
+      moreBtn('applied', rows.length, Math.min(rows.length, lim)),
+      h('p', { class: 'sub', style: { marginTop: '12px' } }, 'Applied jobs leave Found today, All open roles and Strong matches. Jobs from your trackers and the Resume Review Desk are listed by the date you applied; ones you mark here are remembered on this device.'));
+  }
+
   // ---------- smaller pages ----------
   function hiringPanel(n) {
     const d = state.data;
@@ -1049,6 +1134,7 @@ body { background: var(--paper); }
       .filter((j) => !f.savedOnly || saved.has(j.key))
       .filter((j) => !f.oneCity || j.region !== 'Several locations')
       .filter((j) => (f.showHidden ? true : !hidden.has(j.key)))
+      .filter((j) => !isMarked(j))
       .filter((j) => matchQ(j.role, j.company, j.location))
       .sort(f.sort === 'company' ? (a, b) => a.company.localeCompare(b.company) || a.role.localeCompare(b.role) : f.sort === 'role' ? (a, b) => a.role.localeCompare(b.role) : (a, b) => (b.first_seen || '').localeCompare(a.first_seen || '') || a.company.localeCompare(b.company));
     const lim = state.limit.open || 60;
@@ -1154,7 +1240,7 @@ body { background: var(--paper); }
   function render() {
     if (!state.data) return;
     chrome();
-    const views = { home: viewHome, found: viewFound, open: viewOpen, strong: viewStrong, starred: viewStarred, hidden: viewHidden, apps: viewApps, followups: viewFollowups, activity: viewActivity, companies: viewCompanies, hiring: viewHiring, chatgpt: viewChatGPT };
+    const views = { home: viewHome, found: viewFound, open: viewOpen, strong: viewStrong, starred: viewStarred, hidden: viewHidden, applied: viewApplied, apps: viewApps, followups: viewFollowups, activity: viewActivity, companies: viewCompanies, hiring: viewHiring, chatgpt: viewChatGPT };
     if (!views[state.tab]) state.tab = 'home';
     const pg = PAGES[state.tab];
     const out = [].concat(views[state.tab]());
