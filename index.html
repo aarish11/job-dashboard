@@ -663,7 +663,7 @@ body { background: var(--paper); }
   function navCounts() {
     const d = state.data;
     return { found: foundAll().filter(inRegion).filter((j) => inRange(j, 'today')).filter((j) => !isMarked(j)).length, open: d.portal_jobs.filter(inRegion).length,
-      strong: d.scored_jobs.filter(inRegion).filter((j) => Number(j.score) >= 7).length, starred: saved.size, hidden: hidden.size || null, applied: appliedMap().size || null,
+      strong: d.scored_jobs.filter(inRegion).filter((j) => Number(j.score) >= 7).length, starred: starredJobs().length, hidden: hidden.size || null, applied: appliedMap().size || null,
       apps: (d.trackers || []).filter(inRegion).length, followups: fuRows().length, companies: d.companies.filter(inRegion).length,
       chatgpt: d.companies.filter((c) => c.scan_status !== 'Scanned').filter(inRegion).length };
   }
@@ -1032,7 +1032,8 @@ body { background: var(--paper); }
   function starredJobs() {
     const idx = jobIndex();
     return [...saved].map((k) => idx.get(k) || { key: k, link: k, role: titleFromUrl(k) || 'Saved job', company: '', location: '', region: '', gone: true })
-      .map((j) => ({ ...j, sent: sentAt(j.key) }));
+      .map((j) => ({ ...j, sent: sentAt(j.key) }))
+      .filter((j) => !isMarked(j)); // applied jobs live in the Applied folder
   }
   async function sendReview(list, btn, label) {
     if (!list.length) return;
@@ -1067,12 +1068,12 @@ body { background: var(--paper); }
     const b3 = h('button', { class: 'btn quiet', type: 'button', disabled: !sentRows.length, onclick: () => clearStars(sentRows.map((j) => j.key), 'sent') }, `Clear sent (${sentRows.length})`);
     const b4 = h('button', { class: 'btn danger', type: 'button', disabled: !saved.size, onclick: () => clearStars([...saved], 'all') }, 'Clear all stars');
     return h('section', { class: 'panel' },
-      h('p', { class: 'sub' }, `${fmt(saved.size)} starred on this device${sentRows.length ? ` · ${fmt(sentRows.length)} already sent to the Review Desk` : ''}. Tick the ones you want reviewed and send them; the next review run picks them up.`),
+      h('p', { class: 'sub' }, `${fmt(all.length)} starred on this device${sentRows.length ? ` · ${fmt(sentRows.length)} already sent to the Review Desk` : ''}. Tick the ones you want reviewed and send them; the next review run picks them up.`),
       h('div', { class: 'actbar', style: { marginBottom: '10px' } }, b1, b2, selAll, b3, b4),
       rows.length ? h('div', { class: 'rows' }, rows.map((j) => h('div', { class: 'sel-row' },
         h('input', { type: 'checkbox', 'aria-label': 'Select ' + j.role, checked: selected.has(j.key), disabled: !!j.gone, onchange: (e) => { e.target.checked ? selected.add(j.key) : selected.delete(j.key); render(); } }),
         jobRow(j, { score: true, extra: (x) => (x.sent ? h('span', { class: 'sent-tag' }, 'Sent ' + day(x.sent)) : x.gone ? h('span', { class: 'fstate' }, 'No longer open') : null) }))))
-        : h('p', { class: 'empty' }, saved.size ? 'No starred jobs match this region or search.' : 'No starred jobs yet. Tap the star on any job to add it here.'));
+        : h('p', { class: 'empty' }, all.length ? 'No starred jobs match this region or search.' : 'No starred jobs yet. Tap the star on any job to add it here.'));
   }
 
   // ---------- hidden ----------
